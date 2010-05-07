@@ -1,0 +1,94 @@
+<html>
+ <head>
+  <style type="text/css">
+#canvas {
+  border: 1px solid black;
+}
+  </style>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="application/javascript"></script>
+  <script src="http://json.org/json2.js"></script>
+  <script type="application/javascript">
+var Player = function(id, options) {
+  if (!id) throw new Error("No player ID");
+  this.id = id;
+
+  if (!options) options = {};
+  this.x = options.x || 250;
+  this.y = options.y || 250;
+}
+
+Player.prototype.notify = function(evt) {
+  switch(evt.type) {
+    case "click":
+      if (this.walker) clearTimeout(this.walker);
+      this.walk_to(evt.offsetX, evt.offsetY);
+      this.notify_server({id:this.id,x:evt.offsetX, y:evt.offsetY});
+      break;
+  }
+};
+
+Player.prototype.walk_to = function(x, y, angle) {
+  if (!angle) {
+    var x_diff = x - this.x;
+    var y_diff = -(y - this.y);
+    var distance = Math.sqrt(x_diff*x_diff + y_diff*y_diff);
+    angle = Math.atan2(y_diff, x_diff);
+    if (angle < 0) angle += Math.PI*2;
+
+    console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
+  }
+
+  var x_diff = 2*Math.cos(angle);
+  var y_diff = 2*Math.sin(angle);
+  // console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
+
+  if (this.x != x) this.x = this.x + x_diff;
+  if (this.y != y) this.y = this.y - y_diff;
+
+  if (Math.abs(this.x-x) + Math.abs(this.y - y) > 5) {
+   var self = this;
+   this.walker = setTimeout(function(){self.walk_to(x,y,angle)}, 25);
+  }
+};
+
+
+var me = new Player('me');
+
+function draw(ctx, me) {
+  ctx.beginPath();
+
+  // clear drawing area
+  ctx.clearRect(0,0,500,500);
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#000000';
+  ctx.fillRect(0,0,500,500);
+
+  // draw me and fill me in
+  ctx.rect(me.x,me.y,5,5);
+
+  ctx.fillStyle = '#000000';
+  ctx.fill();
+
+  ctx.stroke();
+
+  ctx.closePath();
+
+  setTimeout(function(){draw(ctx, me)}, 25);
+}
+
+function init() {
+ var canvas = $("#canvas").get(0);
+ var ctx = canvas.getContext("2d");
+
+ draw(ctx, me);
+}
+  </script>
+ </head>
+ <body onload="init()">
+   <canvas id="canvas" width="500" height="500"></canvas>
+   <iframe src="http://localhost:4011/comet_view"></iframe>
+ </body>
+ <script type="text/javascript">
+init();
+ </script>
+</html>
