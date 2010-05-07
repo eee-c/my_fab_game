@@ -1,4 +1,4 @@
-= My (fab) Game
+# My (fab) Game
 
 This is a `<canvas>` based room "game" that I am putting together for the kids.  Ultimately it should allow your character to mill about the room and talk to other characters in the room.  My kids seem to think this is the height of online gaming.
 
@@ -12,7 +12,7 @@ Currently there is a view-only version of the board at: http://localhost:4011/vi
 
 You can follow along with development of this starting at: http://japhr.blogspot.com/2010/04/sidebar-chain-chatting-with-fabjs.html
 
-== LICENSE:
+## LICENSE:
 
 (The MIT License)
 
