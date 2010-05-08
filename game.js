@@ -43,18 +43,11 @@ with ( require( "fab" ) )
 	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
     } )
 
-  (/^\/javascript/)
-    (/^\/([_\w]+)\.js$/)
+  (/^\/(javascript|stylesheets)/)
+    (/^\/([_\w]+)\.(js|css)$/)
       (fab.nodejs.fs)
-        ( fab.tmpl, "javascript/<%= this %>.js" )
-        ( fab.capture.at, 0 )
-    (404)
-
-  (/^\/stylesheets/)
-    (/^\/([_\w]+)\.css$/)
-      (fab.nodejs.fs)
-        ( fab.tmpl, "stylesheets/<%= this %>.css" )
-        ( fab.capture.at, 0 )
+        ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
+        ( fab.capture )
     (404)
 
   (/^\/([_\w]+)$/)
