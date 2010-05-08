@@ -50,6 +50,13 @@ with ( require( "fab" ) )
         ( fab.capture.at, 0 )
     (404)
 
+  (/^\/stylesheets/)
+    (/^\/([_\w]+)\.css$/)
+      (fab.nodejs.fs)
+        ( fab.tmpl, "stylesheets/<%= this %>.css" )
+        ( fab.capture.at, 0 )
+    (404)
+
   (/^\/([_\w]+)$/)
     (fab.nodejs.fs)
       ( fab.tmpl, "html/<%= this %>.html" )

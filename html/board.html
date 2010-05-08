@@ -1,38 +1,14 @@
 <html>
  <head>
-  <style type="text/css">
-#canvas {
-  border: 1px solid black;
-}
-  </style>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="application/javascript"></script>
+  <link href="/stylesheets/board.css" media="screen" rel="stylesheet" type="text/css" />
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="application/javascript"></script>
 
   <script src="/javascript/json2.js"></script>
   <script src="/javascript/player.js"></script>
+  <script src="/javascript/board.js"></script>
 
   <script type="application/javascript">
-function draw(ctx, me) {
-  ctx.beginPath();
-
-  // clear drawing area
-  ctx.clearRect(0,0,500,500);
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#000000';
-  ctx.fillRect(0,0,500,500);
-
-  // draw me and fill me in
-  ctx.rect(me.x,me.y,5,5);
-
-  ctx.fillStyle = '#000000';
-  ctx.fill();
-
-  ctx.stroke();
-
-  ctx.closePath();
-
-  setTimeout(function(){draw(ctx, me)}, 25);
-}
-
 function canvas_events (canvas, listeners) {
   $(canvas).click(function(evt) {
     listeners.forEach(
@@ -41,7 +17,7 @@ function canvas_events (canvas, listeners) {
   });
 }
 
-function init() {
+$(function() {
  var canvas = $("#canvas").get(0);
  var ctx = canvas.getContext("2d");
 
@@ -49,10 +25,10 @@ function init() {
 
  canvas_events(canvas, [me]);
  draw(ctx, me);
-}
+});
   </script>
  </head>
- <body onload="init()">
+ <body>
    <canvas id="canvas" width="500" height="500"></canvas>
  </body>
 </html>
