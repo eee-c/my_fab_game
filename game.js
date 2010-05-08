@@ -8,39 +8,36 @@ with ( require( "fab" ) )
   ( listen, 0xFAB )
 
   ( /move/ )
-
-    (
-      function () {
+    ( function() {
         var out = this;
-	return function listener( obj ) {
-	  if ( !obj ) out();
-	  else if ( obj.body ) {
-	    puts(obj.body);
-	    broadcast(obj);
-	  }
-	  return listener;
-	};
-      }
-    )
+        return function listener( obj ) {
+          if ( !obj ) out();
+          else if ( obj.body ) {
+            puts(obj.body);
+            broadcast(obj);
+          }
+          return listener;
+        };
+      } )
 
 
   ( /^\/comet_view/ )
-    ( function(){
+    ( function() {
       listeners.push( this );
-	this({headers: { "content-type": "text/html"},
-	      body: "<html><body>\n"})
+        this({headers: { "content-type": "text/html"},
+              body: "<html><body>\n"})
 
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
 
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-	    ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
     } )
 
   (/^\/(javascript|stylesheets)/)
