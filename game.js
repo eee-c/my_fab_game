@@ -72,7 +72,7 @@ function broadcast(obj) {
       var body = '<script type="text/javascript">' + "\nconsole.debug('" + obj.body + "')\n</script>\n";
       listener({body: body});
 
-      body = '<script type="text/javascript">' + "\nloc = " + obj.body + ";\nwindow.parent.me.walk_to(loc.x, loc.y);\n</script>\n";
+      body = '<script type="text/javascript">' + "\nloc = " + obj.body + ";\nwindow.parent.me.stop();\nwindow.parent.me.walk_to(loc.x, loc.y);\n</script>\n";
       listener({body: body});
     }
   );

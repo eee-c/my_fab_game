@@ -10,11 +10,15 @@ var Player = function(id, options) {
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
-      if (this.walker) clearTimeout(this.walker);
+      this.stop();
       this.walk_to(evt.offsetX, evt.offsetY);
       this.notify_server({id:this.id,x:evt.offsetX, y:evt.offsetY});
       break;
   }
+};
+
+Player.prototype.stop = function () {
+  if (this.walker) clearTimeout(this.walker);
 };
 
 Player.prototype.walk_to = function(x, y, angle) {
