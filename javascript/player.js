@@ -11,8 +11,8 @@ Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
       this.stop();
-      this.walk_to(evt.offsetX, evt.offsetY);
-      this.notify_server({id:this.id,x:evt.offsetX, y:evt.offsetY});
+      this.walk_to(evt.x, evt.y);
+      this.notify_server({id:this.id,x:evt.x, y:evt.y});
       break;
   }
 };
