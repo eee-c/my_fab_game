@@ -9,22 +9,8 @@
   <script src="/javascript/board.js"></script>
 
   <script type="application/javascript">
-function canvas_events (canvas, listeners) {
-  $(canvas).click(function(evt) {
-    listeners.forEach(
-      function(listener) { listener.notify(evt) }
-    );
-  });
-}
-
 $(function() {
- var canvas = $("#canvas").get(0);
- var ctx = canvas.getContext("2d");
-
- var me = new Player('me');
-
- canvas_events(canvas, [me]);
- draw(ctx, me);
+  var room = new Room($("#canvas").get(0));
 });
   </script>
  </head>

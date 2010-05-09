@@ -9,13 +9,10 @@
   <script src="/javascript/board.js"></script>
 
   <script type="application/javascript">
-var me = new Player('me');
-
+var me;
 $(function() {
-  var canvas = $("#canvas").get(0);
-  var ctx = canvas.getContext("2d");
-
-  draw(ctx, me);
+  var room = new Room($("#canvas").get(0), {view_only: true});
+  me = room.get_me();
 });
   </script>
  </head>
