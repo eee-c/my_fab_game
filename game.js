@@ -69,6 +69,7 @@ function broadcast(obj) {
         "window.parent.player_list.add_player(attrs);\n" +
         "var player = window.parent.player_list.get_player(attrs.id);" +
         "if (typeof(player) != 'undefined') {\n" +
+        "  player.stop();\n" +
         "  player.walk_to(attrs.x, attrs.y);\n" +
         "}" +
         "</script>\n";
