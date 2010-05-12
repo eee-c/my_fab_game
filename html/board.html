@@ -6,15 +6,35 @@
 
   <script src="/javascript/json2.js"></script>
   <script src="/javascript/player.js"></script>
+  <script src="/javascript/player_list.js"></script>
   <script src="/javascript/room.js"></script>
 
   <script type="application/javascript">
+var player_list;
+
 $(function() {
-  var room = new Room($("#canvas").get(0));
+  var kv = location.search.substr(1).split(/=/);
+  if (kv[0] == 'player' && kv[1]) {
+    $('#login').hide();
+
+    var me = new Player(kv[1]);
+    player_list = new PlayerList(me);
+    new Room($("#canvas")[0], player_list);
+  }
+  else {
+    $('#canvas').hide();
+  }
 });
   </script>
  </head>
  <body>
+   <form id="login" method="get">
+     <label>Name
+       <input type="text" name="player">
+     </label>
+     <input type="submit" value="Play">
+   </form>
    <canvas id="canvas" width="500" height="500"></canvas>
+   <iframe src="/comet_view"></iframe>
  </body>
 </html>

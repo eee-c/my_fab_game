@@ -40,8 +40,8 @@ Player.prototype.walk_to = function(x, y, angle) {
   if (this.y != y) this.y = this.y - y_diff;
 
   if (Math.abs(this.x-x) + Math.abs(this.y - y) > 5) {
-   var self = this;
-   this.walker = setTimeout(function(){self.walk_to(x,y,angle)}, 25);
+    var self = this;
+    this.walker = setTimeout(function(){self.walk_to(x,y,angle);}, 25);
   }
 };
 

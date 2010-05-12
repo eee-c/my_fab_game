@@ -1,15 +1,14 @@
-var Room = function(canvas, options) {
+var Room = function(canvas, player_list) {
   this.canvas = canvas;
   this.canvas_context = canvas.getContext("2d");
 
   this.subscribers = [];
   this.init_events();
 
-  this.me = new Player('me');
-  if (!options) options = {view_only: false};
-  if (!options.view_only) {
-    this.add_subscriber(this.me);
-  }
+  this.player_list = player_list;
+
+  this.me = player_list.me;
+  this.add_subscriber(this.me);
 
   this.draw();
 };
@@ -38,7 +37,17 @@ Room.prototype.decorate_event = function(evt) {
   };
 };
 
+Room.prototype.draw_player = function(ctx, player, color) {
+  ctx.rect(player.x,player.y,5,5);
+
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  ctx.stroke();
+};
+
 Room.prototype.draw = function() {
+  var self = this;
   var ctx = this.canvas_context;
   var me = this.me;
 
@@ -50,16 +59,15 @@ Room.prototype.draw = function() {
   ctx.strokeStyle = '#000000';
   ctx.fillRect(0,0,500,500);
 
-  // draw me and fill me in
-  ctx.rect(me.x,me.y,5,5);
+  this.draw_player(ctx, me, '#000000');
 
-  ctx.fillStyle = '#000000';
-  ctx.fill();
-
-  ctx.stroke();
+  this.player_list.others().forEach(function(player) {
+    // console.debug("room drawing: " + player.id);
+    self.draw_player(ctx, player, '#aaaaaa');
+  });
 
   ctx.closePath();
 
-  var self = this;
   setTimeout(function(){self.draw();}, 25);
 };
+
