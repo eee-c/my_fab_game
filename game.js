@@ -60,9 +60,9 @@ function broadcast(obj) {
   puts("broadcasting to "+listeners.length+" listeners");
   listeners.forEach(
     function(listener) {
-      var body = '<script type="text/javascript">' + "\n" +
-        "  window.parent.player_list.walk_player("+ obj.body +");\n" +
-        "</script>\n";
+      var body = '<script type="text/javascript">' +
+                 'window.parent.player_list.walk_player('+ obj.body +');' +
+                 '</script>' + "\n";
       listener({body: body});
     }
   );
