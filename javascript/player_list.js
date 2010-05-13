@@ -3,15 +3,22 @@ var PlayerList = function(me) {
   this.other_players = {};
 };
 
+PlayerList.prototype.walk_player = function(attrs) {
+  this.add_player(attrs);
+  var player = this.get_player(attrs.id);
+  if (player) {
+    player.stop();
+    player.walk_to(attrs.x, attrs.y);
+  }
+};
+
 PlayerList.prototype.add_player = function(obj) {
   if (!this.other_players[obj.id] && obj.id != this.me.id) {
-    if (console) {console.debug("adding:" + obj.id);}
     this.other_players[obj.id] = new Player(obj.id, obj);
   }
 };
 
 PlayerList.prototype.get_player = function(id) {
-  if (console) {console.debug("getting:" + id);}
   return this.other_players[id];
 };
 

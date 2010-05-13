@@ -5,6 +5,7 @@ var Player = function(id, options) {
   if (!options) options = {};
   this.x = options.x || 250;
   this.y = options.y || 250;
+  this.notify_server({id:this.id,x:this.x, y:this.y});
 };
 
 Player.prototype.notify = function(evt) {
@@ -29,7 +30,7 @@ Player.prototype.walk_to = function(x, y, angle) {
     angle = Math.atan2(y_diff, x_diff);
     if (angle < 0) angle += Math.PI*2;
 
-    if (console) console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
+    // console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
   }
 
   var x_diff = 2*Math.cos(angle);
@@ -46,5 +47,5 @@ Player.prototype.walk_to = function(x, y, angle) {
 };
 
 Player.prototype.notify_server = function(change) {
-  $.post("http://localhost:4011/move", JSON.stringify(change));
+  $.post("/move", JSON.stringify(change));
 };

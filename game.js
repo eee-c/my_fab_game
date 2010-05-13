@@ -22,7 +22,6 @@ with ( require( "fab" ) )
 
 
   ( /^\/comet_view/ )
-    ( fab.tap, function () { puts("[comet_view] here"); })
     ( function() {
         listeners.push( this );
         this({headers: { "content-type": "text/html"},
@@ -61,17 +60,8 @@ function broadcast(obj) {
   puts("broadcasting to "+listeners.length+" listeners");
   listeners.forEach(
     function(listener) {
-      var body = '<script type="text/javascript">' + "\nif (console) console.debug('" + obj.body + "')\n</script>\n";
-      listener({body: body});
-
-      body = '<script type="text/javascript">' + "\n" +
-        "var attrs = " + obj.body + ";\n" +
-        "window.parent.player_list.add_player(attrs);\n" +
-        "var player = window.parent.player_list.get_player(attrs.id);" +
-        "if (typeof(player) != 'undefined') {\n" +
-        "  player.stop();\n" +
-        "  player.walk_to(attrs.x, attrs.y);\n" +
-        "}" +
+      var body = '<script type="text/javascript">' + "\n" +
+        "  window.parent.player_list.walk_player("+ obj.body +");\n" +
         "</script>\n";
       listener({body: body});
     }
