@@ -23,25 +23,7 @@ with ( require( "fab" ) )
 
   ( /^\/comet_view/ )
     ( init_comet )
-
-    (
-      function() {
-        var out = this;
-        return function( head ) {
-          var search = head.url.search.substring(1);
-          var q = require('querystring').parse(search);
-          for (var prop in q) {
-            puts(prop + ": " + q[prop]);
-          }
-          puts(q.x);
-
-
-          var app = out({ body: {x: q.x || 0, y: q.y || 0} });
-          if ( app ) app();
-        };
-      }
-    )
-
+    ( player_from_querystring )
 
   (/^\/(javascript|stylesheets)/)
     (/^\/([_\w]+)\.(js|css)$/)
@@ -76,10 +58,10 @@ function init_comet (app) {
     var out = this;
 
     return app.call( function listener(obj) {
-
-      players.push( out );
-      out({ headers: { "content-type": "text/html" },
-            body: "<html><body>\n" })
+      if (obj && obj.body) {
+        players.push(out);
+        out({ headers: { "content-type": "text/html" },
+              body: "<html><body>\n" })
 
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
@@ -92,8 +74,23 @@ function init_comet (app) {
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
-
+      }
       return listener;
     });
+  };
+}
+
+function player_from_querystring() {
+  var out = this;
+  return function(head) {
+    if (head.url.search) {
+      var search = head.url.search.substring(1);
+      var q = require('querystring').parse(search);
+      var app = out({ body: {id: q.id, x: q.x || 0, y: q.y || 0} });
+      if ( app ) app();
+    }
+    else {
+      out();
+    }
   };
 }
