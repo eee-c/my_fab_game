@@ -1,5 +1,5 @@
 var puts = require( "sys" ).puts;
-var listeners = [];
+var players = [];
 
 with ( require( "fab" ) )
 
@@ -22,23 +22,26 @@ with ( require( "fab" ) )
 
 
   ( /^\/comet_view/ )
-    ( function() {
-        listeners.push( this );
-        this({headers: { "content-type": "text/html"},
-              body: "<html><body>\n"})
+    ( init_comet )
 
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+    (
+      function() {
+        var out = this;
+        return function( head ) {
+          var search = head.url.search.substring(1);
+          var q = require('querystring').parse(search);
+          for (var prop in q) {
+            puts(prop + ": " + q[prop]);
+          }
+          puts(q.x);
 
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
-            ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
-    } )
+
+          var app = out({ body: {x: q.x || 0, y: q.y || 0} });
+          if ( app ) app();
+        };
+      }
+    )
+
 
   (/^\/(javascript|stylesheets)/)
     (/^\/([_\w]+)\.(js|css)$/)
@@ -57,13 +60,40 @@ with ( require( "fab" ) )
 
 
 function broadcast(obj) {
-  puts("broadcasting to "+listeners.length+" listeners");
-  listeners.forEach(
-    function(listener) {
+  puts("broadcasting to "+players.length+" players");
+  players.forEach(
+    function(player) {
       var body = '<script type="text/javascript">' +
                  'window.parent.player_list.walk_player('+ obj.body +');' +
                  '</script>' + "\n";
-      listener({body: body});
+      player({body: body});
     }
   );
+}
+
+function init_comet (app) {
+  return function () {
+    var out = this;
+
+    return app.call( function listener(obj) {
+
+      players.push( out );
+      out({ headers: { "content-type": "text/html" },
+            body: "<html><body>\n" })
+
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
+         ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
+
+      return listener;
+    });
+  };
 }
