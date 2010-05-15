@@ -18,6 +18,8 @@ $(function() {
     $('#login').hide();
 
     var me = new Player(kv[1]);
+    $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
+
     player_list = new PlayerList(me);
     new Room($("#canvas")[0], player_list);
   }
@@ -35,6 +37,6 @@ $(function() {
      <input type="submit" value="Play">
    </form>
    <canvas id="canvas" width="500" height="500"></canvas>
-   <iframe src="/comet_view"></iframe>
+   <iframe id="iframe"></iframe>
  </body>
 </html>
