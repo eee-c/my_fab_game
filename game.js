@@ -1,5 +1,5 @@
 var puts = require( "sys" ).puts;
-var players = [];
+var players = {};
 
 with ( require( "fab" ) )
 
@@ -13,8 +13,8 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            puts(obj.body);
-            broadcast(obj);
+            broadcast(obj.body);
+            update_player_status(JSON.parse(""+obj.body));
           }
           return listener;
         };
@@ -41,16 +41,26 @@ with ( require( "fab" ) )
   ( 404 );
 
 
-function broadcast(obj) {
-  puts("broadcasting to "+players.length+" players");
-  players.forEach(
-    function(player) {
-      var body = '<script type="text/javascript">' +
-                 'window.parent.player_list.walk_player('+ obj.body +');' +
-                 '</script>' + "\n";
-      player({body: body});
-    }
-  );
+function broadcast(player_string) {
+  var num = 0;
+  for (var id in players) {
+    var player = players[id];
+    var body = comet_walk_player(player_string);
+    player.listener({body: body});
+    num++;
+  }
+  puts("broadcasting to "+num+" players");
+}
+
+function update_player_status(status) {
+  puts("updating player status: " + status.id);
+  players[status.id].status = status;
+}
+
+function comet_walk_player(player_string) {
+  return '<script type="text/javascript">' +
+         'window.parent.player_list.walk_player('+ player_string +');' +
+         '</script>' + "\n";
 }
 
 function init_comet (app) {
@@ -59,9 +69,8 @@ function init_comet (app) {
 
     return app.call( function listener(obj) {
       if (obj && obj.body) {
-        players.push(out);
-        out({ headers: { "content-type": "text/html" },
-              body: "<html><body>\n" })
+        var downstream = out({ headers: { "content-type": "text/html" },
+                               body: "<html><body>\n" })
 
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
@@ -74,6 +83,14 @@ function init_comet (app) {
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"})
          ({body: "<script type=\"text/javascript\">\"123456789 123456789 123456789 123456789 123456789 12345\";</script>\n"});
+
+        for (var id in players) {
+          downstream = downstream({body: comet_walk_player(JSON.stringify(players[id].status))});
+        }
+
+        puts("adding: " + obj.body.id);
+        players[obj.body.id] = {status: obj.body, listener: out};
+        broadcast(JSON.stringify(obj.body));
       }
       return listener;
     });
@@ -86,7 +103,7 @@ function player_from_querystring() {
     if (head.url.search) {
       var search = head.url.search.substring(1);
       var q = require('querystring').parse(search);
-      var app = out({ body: {id: q.id, x: q.x || 0, y: q.y || 0} });
+      var app = out({ body: {id: q.player, x: q.x || 0, y: q.y || 0} });
       if ( app ) app();
     }
     else {

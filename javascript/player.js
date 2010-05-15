@@ -5,7 +5,6 @@ var Player = function(id, options) {
   if (!options) options = {};
   this.x = options.x || 250;
   this.y = options.y || 250;
-  this.notify_server({id:this.id,x:this.x, y:this.y});
 };
 
 Player.prototype.notify = function(evt) {
