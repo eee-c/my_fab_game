@@ -1,6 +1,5 @@
-var Room = function(canvas, player_list) {
-  this.canvas = canvas;
-  this.canvas_context = canvas.getContext("2d");
+var Room = function(container, player_list) {
+  this.container = container;
 
   this.subscribers = [];
   this.init_events();
@@ -21,7 +20,8 @@ Room.prototype.add_subscriber = function(obj) {
 
 Room.prototype.init_events = function() {
   var self = this;
-  $(this.canvas).click(function(evt) {
+  $(this.container).click(function(evt) {
+                        console.debug("here");
     var decorated_event = self.decorate_event(evt);
     self.subscribers.forEach(
       function(subscriber) { subscriber.notify(decorated_event); }
@@ -32,42 +32,29 @@ Room.prototype.init_events = function() {
 Room.prototype.decorate_event = function(evt) {
   return {
     type: evt.type,
-    x: evt.pageX - $(this.canvas).offset().left,
-    y: evt.pageY - $(this.canvas).offset().top
+    x: evt.pageX - $(this.container).offset().left,
+    y: evt.pageY - $(this.container).offset().top
   };
 };
 
-Room.prototype.draw_player = function(ctx, player, color) {
-  ctx.rect(player.x,player.y,5,5);
-
-  ctx.fillStyle = color;
-  ctx.fill();
-
-  ctx.stroke();
+Room.prototype.draw_player = function(player, color) {
+  var c = this.paper.circle(player.y, player.x, 3);
+  c.attr({fill: color, opacity: 0.5});
 };
 
 Room.prototype.draw = function() {
   var self = this;
-  var ctx = this.canvas_context;
-  var me = this.me;
 
-  ctx.beginPath();
+  this.paper = Raphael(this.container, 500, 500);
+  this.paper.clear();
+  this.paper.
+    rect(0, 0, 500, 500, 4).
+    attr({fill: "#fff", stroke: "none"});
 
-  // clear drawing area
-  ctx.clearRect(0,0,500,500);
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#000000';
-  ctx.fillRect(0,0,500,500);
-
-  this.draw_player(ctx, me, '#000000');
+  this.draw_player(this.me, '#000000');
 
   this.player_list.others().forEach(function(player) {
-    // console.debug("room drawing: " + player.id);
-    self.draw_player(ctx, player, '#aaaaaa');
+    self.draw_player(player, '#aaaaaa');
   });
-
-  ctx.closePath();
-
-  setTimeout(function(){self.draw();}, 25);
 };
 

@@ -2,12 +2,13 @@
  <head>
   <link href="/stylesheets/board.css" media="screen" rel="stylesheet" type="text/css" />
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="application/javascript"></script>
+  <script src="/javascript/jquery-min.js" type="application/javascript"></script>
 
-  <script src="/javascript/json2.js"></script>
-  <script src="/javascript/player.js"></script>
-  <script src="/javascript/player_list.js"></script>
-  <script src="/javascript/room.js"></script>
+  <script src="/javascript/json2.js" type="application/javascript"></script>
+  <script src="/javascript/raphael-min.js" type="application/javascript"></script>
+  <script src="/javascript/player.js" type="application/javascript">"></script>
+  <script src="/javascript/player_list.js" type="application/javascript"></script>
+  <script src="/javascript/room.js" type="application/javascript"></script>
 
   <script type="application/javascript">
 var player_list;
@@ -21,7 +22,7 @@ $(function() {
     $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
 
     player_list = new PlayerList(me);
-    new Room($("#canvas")[0], player_list);
+    new Room($("#room-container")[0], player_list);
   }
   else {
     $('#canvas').hide();
@@ -36,7 +37,7 @@ $(function() {
      </label>
      <input type="submit" value="Play">
    </form>
-   <canvas id="canvas" width="500" height="500"></canvas>
+   <div id="room-container"></div>
    <iframe id="iframe"></iframe>
  </body>
 </html>
