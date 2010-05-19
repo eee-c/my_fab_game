@@ -18,15 +18,9 @@ Player.prototype.notify = function(evt) {
 };
 
 Player.prototype.stop = function () {
-  console.debug("try to stop("+this.id+")");
   this.drawable.stop();
-  console.debug("x: "+this.drawable.attrs.cx +" y: "+this.drawable.attrs.cy);
   this.x = this.drawable.attrs.cx;
   this.y = this.drawable.attrs.cy;
-};
-
-Player.prototype.motion_callback = function() {
-  console.debug("num args: " +arguments.length);
 };
 
 Player.prototype.walk_to = function(x, y) {
