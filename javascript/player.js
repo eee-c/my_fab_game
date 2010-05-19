@@ -32,6 +32,13 @@ Player.prototype.walk_to = function(x, y) {
   this.y = y;
 };
 
+Player.prototype.quit = function() {
+  this.drawable.remove();
+  delete this.x;
+  delete this.y;
+  delete this.id;
+}
+
 Player.prototype.attach_drawable = function(drawable) {
   this.drawable = drawable;
 };

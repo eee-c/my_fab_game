@@ -1,4 +1,4 @@
-var PlayerList = function(me, room) {
+var PlayerList = function(me, room, options) {
   this.me = me;
   this.room = room;
 
@@ -8,6 +8,9 @@ var PlayerList = function(me, room) {
   me.attach_drawable(el);
 
   this.other_players = {};
+
+  if (!options) options = {};
+  this.onComplete = options.onComplete || function() {};
 };
 
 PlayerList.prototype.walk_player = function(attrs) {
@@ -29,12 +32,23 @@ PlayerList.prototype.add_player = function(obj) {
   }
 };
 
+PlayerList.prototype.remove_player = function(id) {
+  if (this.me.id == id) {
+    // I am leaving and so is everyone else (as far as I'm concerned)
+    this.me.quit();
+    for (var oid in this.other_players) {
+      this.other_players[oid].quit();
+    }
+    this.onComplete();
+  }
+  else {
+    this.get_player(id).quit();
+    delete this.other_players[id];
+  }
+}
+
 PlayerList.prototype.get_player = function(id) {
   return this.other_players[id];
-};
-
-PlayerList.prototype.me = function() {
-  return this.me;
 };
 
 PlayerList.prototype.others = function() {
