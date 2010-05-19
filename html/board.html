@@ -21,8 +21,8 @@ $(function() {
     var me = new Player(kv[1]);
     $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
 
-    player_list = new PlayerList(me);
-    new Room($("#room-container")[0], player_list);
+    var room = new Room($("#room-container")[0]);
+    player_list = new PlayerList(me, room);
   }
 });
   </script>

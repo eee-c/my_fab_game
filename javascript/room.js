@@ -1,18 +1,11 @@
-var Room = function(container, player_list) {
+var Room = function(container) {
   this.container = container;
 
   this.subscribers = [];
   this.init_events();
 
-  this.player_list = player_list;
-
-  this.me = player_list.me;
-  this.add_subscriber(this.me);
-
   this.draw();
 };
-
-Room.prototype.get_me = function() { return this.me; };
 
 Room.prototype.add_subscriber = function(obj) {
   this.subscribers.push(obj);
@@ -21,7 +14,6 @@ Room.prototype.add_subscriber = function(obj) {
 Room.prototype.init_events = function() {
   var self = this;
   $(this.container).click(function(evt) {
-                        console.debug("here");
     var decorated_event = self.decorate_event(evt);
     self.subscribers.forEach(
       function(subscriber) { subscriber.notify(decorated_event); }
@@ -40,6 +32,7 @@ Room.prototype.decorate_event = function(evt) {
 Room.prototype.draw_player = function(player, color) {
   var c = this.paper.circle(player.y, player.x, 3);
   c.attr({fill: color, opacity: 0.5});
+  return c;
 };
 
 Room.prototype.draw = function() {
@@ -51,10 +44,10 @@ Room.prototype.draw = function() {
     rect(0, 0, 500, 500, 4).
     attr({fill: "#fff", stroke: "none"});
 
-  this.draw_player(this.me, '#000000');
+  // this.draw_player(this.player_list.me, '#000000');
 
-  this.player_list.others().forEach(function(player) {
-    self.draw_player(player, '#aaaaaa');
-  });
+  // this.player_list.others().forEach(function(player) {
+  //   self.draw_player(player, '#aaaaaa');
+  // });
 };
 

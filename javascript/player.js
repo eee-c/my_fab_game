@@ -18,31 +18,28 @@ Player.prototype.notify = function(evt) {
 };
 
 Player.prototype.stop = function () {
-  if (this.walker) clearTimeout(this.walker);
+  console.debug("try to stop("+this.id+")");
+  this.drawable.stop();
+  console.debug("x: "+this.drawable.attrs.cx +" y: "+this.drawable.attrs.cy);
+  this.x = this.drawable.attrs.cx;
+  this.y = this.drawable.attrs.cy;
 };
 
-Player.prototype.walk_to = function(x, y, angle) {
-  if (!angle) {
-    var x_diff = x - this.x;
-    var y_diff = -(y - this.y);
-    var distance = Math.sqrt(x_diff*x_diff + y_diff*y_diff);
-    angle = Math.atan2(y_diff, x_diff);
-    if (angle < 0) angle += Math.PI*2;
+Player.prototype.motion_callback = function() {
+  console.debug("num args: " +arguments.length);
+};
 
-    // console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
-  }
+Player.prototype.walk_to = function(x, y) {
+  var self = this;
+  var p = "M"+ this.x + " " + this.y +
+          "L" +     x + " " +      y;
+  this.drawable.animateAlong(p, 3000);
+  this.x = x;
+  this.y = y;
+};
 
-  var x_diff = 2*Math.cos(angle);
-  var y_diff = 2*Math.sin(angle);
-  // console.debug("x_diff: "+x_diff+", y_diff"+y_diff+", angle: "+angle);
-
-  if (this.x != x) this.x = this.x + x_diff;
-  if (this.y != y) this.y = this.y - y_diff;
-
-  if (Math.abs(this.x-x) + Math.abs(this.y - y) > 5) {
-    var self = this;
-    this.walker = setTimeout(function(){self.walk_to(x,y,angle);}, 25);
-  }
+Player.prototype.attach_drawable = function(drawable) {
+  this.drawable = drawable;
 };
 
 Player.prototype.notify_server = function(change) {
