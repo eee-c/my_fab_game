@@ -22,7 +22,11 @@ $(function() {
     $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
 
     var room = new Room($("#room-container")[0]);
-    player_list = new PlayerList(me, room);
+    function goodbye(){
+      alert("You have been logged out.");
+      window.location = window.location.protocol + '//' + window.location.host + window.location.pathname;
+    };
+    player_list = new PlayerList(me, room, {onComplete: goodbye});
   }
 });
   </script>
