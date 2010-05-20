@@ -13,7 +13,7 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            broadcast(obj.body);
+            broadcast(comet_walk_player(obj.body));
             update_player_status(JSON.parse(""+obj.body));
           }
           return listener;
@@ -26,7 +26,7 @@ with ( require( "fab" ) )
     ( player_from_querystring )
 
   (/^\/(javascript|stylesheets)/)
-    (/^\/([_\w]+)\.(js|css)$/)
+    (/^\/([-_\w]+)\.(js|css)$/)
       (fab.nodejs.fs)
         ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
         ( fab.capture )
@@ -41,12 +41,11 @@ with ( require( "fab" ) )
   ( 404 );
 
 
-function broadcast(player_string) {
+function broadcast(comet_command) {
   var num = 0;
   for (var id in players) {
     var player = players[id];
-    var body = comet_walk_player(player_string);
-    player.listener({body: body});
+    player.listener({body: comet_command});
     num++;
   }
   puts("broadcasting to "+num+" players");
@@ -57,10 +56,15 @@ function update_player_status(status) {
   players[status.id].status = status;
 }
 
-function comet_walk_player(player_string) {
+function comet_wrap(js) {
   return '<script type="text/javascript">' +
-         'window.parent.player_list.walk_player('+ player_string +');' +
+         'window.parent.' +
+         js +
          '</script>' + "\n";
+}
+
+function comet_walk_player(player_string) {
+  return comet_wrap('player_list.walk_player('+ player_string +')');
 }
 
 function init_comet (app) {
@@ -90,7 +94,7 @@ function init_comet (app) {
 
         puts("adding: " + obj.body.id);
         players[obj.body.id] = {status: obj.body, listener: out};
-        broadcast(JSON.stringify(obj.body));
+        broadcast(comet_walk_player(JSON.stringify(obj.body)));
       }
       return listener;
     });
