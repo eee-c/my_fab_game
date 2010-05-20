@@ -54,6 +54,7 @@ function broadcast(comet_command) {
 function update_player_status(status) {
   puts("updating player status: " + status.id);
   players[status.id].status = status;
+  idle_watch(status.id);
 }
 
 function comet_wrap(js) {
@@ -65,6 +66,10 @@ function comet_wrap(js) {
 
 function comet_walk_player(player_string) {
   return comet_wrap('player_list.walk_player('+ player_string +')');
+}
+
+function comet_quit_player(id) {
+  return comet_wrap('player_list.remove_player("'+ id +'")');
 }
 
 function init_comet (app) {
@@ -92,13 +97,33 @@ function init_comet (app) {
           downstream = downstream({body: comet_walk_player(JSON.stringify(players[id].status))});
         }
 
-        puts("adding: " + obj.body.id);
-        players[obj.body.id] = {status: obj.body, listener: out};
+        var new_id = obj.body.id;
+        puts("adding: " + new_id);
+        players[new_id] = {status: obj.body, listener: out};
+
+        idle_watch(new_id);
+
         broadcast(comet_walk_player(JSON.stringify(obj.body)));
       }
       return listener;
     });
   };
+}
+
+function idle_watch(id) {
+  if (players[id].idle_timeout) {
+    clearTimeout(players[id].idle_timeout);
+  }
+
+  players[id].idle_timeout = setTimeout(function() {
+    puts("timeout!");
+    drop_player(id);
+  }, 60*1000);
+}
+
+function drop_player(id) {
+  puts("Dropping player \""+ id +"\"");
+  broadcast(comet_quit_player(id));
 }
 
 function player_from_querystring() {

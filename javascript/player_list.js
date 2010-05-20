@@ -45,7 +45,7 @@ PlayerList.prototype.remove_player = function(id) {
     this.get_player(id).quit();
     delete this.other_players[id];
   }
-}
+};
 
 PlayerList.prototype.get_player = function(id) {
   return this.other_players[id];
