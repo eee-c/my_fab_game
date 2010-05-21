@@ -19,10 +19,10 @@ Player.prototype.notify = function(evt) {
 
 Player.prototype.stop = function () {
   this.drawable.stop();
+  this.label.stop();
+
   this.x = this.drawable.attrs.cx;
   this.y = this.drawable.attrs.cy;
-
-  this.label.stop();
 };
 
 Player.prototype.walk_to = function(x, y) {
@@ -42,6 +42,7 @@ Player.prototype.walk_to = function(x, y) {
 
 Player.prototype.quit = function() {
   this.drawable.remove();
+  this.label.remove();
   delete this.x;
   delete this.y;
   delete this.id;
