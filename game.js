@@ -25,6 +25,9 @@ with ( require( "fab" ) )
     ( init_comet )
     ( player_from_querystring )
 
+  ( /^\/status/ )
+    ( player_status )
+
   (/^\/(javascript|stylesheets)/)
     (/^\/([-_\w]+)\.(js|css)$/)
       (fab.nodejs.fs)
@@ -48,7 +51,7 @@ function broadcast(comet_command) {
     player.listener({body: comet_command});
     num++;
   }
-  puts("broadcasting to "+num+" players");
+  puts("broadcasting to "+num+" players: " + comet_command);
 }
 
 function update_player_status(status) {
@@ -116,14 +119,16 @@ function idle_watch(id) {
   }
 
   players[id].idle_timeout = setTimeout(function() {
-    puts("timeout!");
+    puts("timeout " + id +"!");
     drop_player(id);
-  }, 60*1000);
+  }, 1*60*1000);
+  players[id].idle_watch_started = "" + (new Date());
 }
 
 function drop_player(id) {
   puts("Dropping player \""+ id +"\"");
   broadcast(comet_quit_player(id));
+  delete players[id];
 }
 
 function player_from_querystring() {
@@ -139,4 +144,20 @@ function player_from_querystring() {
       out();
     }
   };
+}
+
+function player_status () {
+  var out = this;
+  for (var id in players) {
+    out = out({body: id})
+             ({body: "\n"})
+             ({body: "  timeout?:" + players[id].idle_timeout})
+             ({body: "\n"})
+             ({body: "  idle from:" + players[id].idle_watch_started})
+             ({body: "\n"})
+             ({body: "  x " + players[id].status.x})
+             ({body:  " y " + players[id].status.y})
+             ({body: "\n"});
+  }
+  out();
 }
