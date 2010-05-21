@@ -121,7 +121,7 @@ function idle_watch(id) {
   players[id].idle_timeout = setTimeout(function() {
     puts("timeout " + id +"!");
     drop_player(id);
-  }, 1*60*1000);
+  }, 10*60*1000);
   players[id].idle_watch_started = "" + (new Date());
 }
 
