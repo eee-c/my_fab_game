@@ -19,22 +19,15 @@ Player.prototype.notify = function(evt) {
 
 Player.prototype.stop = function () {
   this.drawable.stop();
-  this.label.stop();
 
   this.x = this.drawable.attrs.cx;
   this.y = this.drawable.attrs.cy;
 };
 
 Player.prototype.walk_to = function(x, y) {
-  this.label.attr({cx: this.x, cy: this.y +10});
-
   var p = "M"+ this.x + " " + this.y +
           "L" +     x + " " +      y;
   this.drawable.animateAlong(p, 3000);
-
-  var pl = "M"+ this.x + " " + this.y + 10 +
-           "L" +     x + " " +      y + 10;
-  this.label.animateAlong(p, 3000);
 
   this.x = x;
   this.y = y;
@@ -50,7 +43,12 @@ Player.prototype.quit = function() {
 
 Player.prototype.attach_drawable = function(drawable) {
   this.drawable = drawable;
-  this.label = drawable.paper.text(this.x, this.y + 10, this.id);
+  var label = drawable.paper.text(this.x, this.y + 10, this.id);
+  this.label = label;
+
+  drawable.onAnimation(function(){
+    label.attr({x: drawable.attr("cx"), y: drawable.attr("cy") + 10});
+  });
 };
 
 Player.prototype.notify_server = function(change) {
