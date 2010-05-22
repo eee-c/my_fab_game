@@ -20,6 +20,18 @@ with ( require( "fab" ) )
         };
       } )
 
+  ( /chat/ )
+    ( function() {
+        var out = this;
+        return function listener( obj ) {
+          if ( !obj ) out();
+          else if ( obj.body ) {
+            broadcast(comet_player_say(obj.body));
+          }
+          return listener;
+        };
+      } )
+
 
   ( /^\/comet_view/ )
     ( init_comet )
@@ -69,6 +81,10 @@ function comet_wrap(js) {
 
 function comet_walk_player(player_string) {
   return comet_wrap('player_list.walk_player('+ player_string +')');
+}
+
+function comet_player_say(player_string) {
+  return comet_wrap('player_list.player_say('+ player_string +')');
 }
 
 function comet_quit_player(id) {
@@ -121,7 +137,7 @@ function idle_watch(id) {
   players[id].idle_timeout = setTimeout(function() {
     puts("timeout " + id +"!");
     drop_player(id);
-  }, 10*60*1000);
+  }, 30*60*1000);
   players[id].idle_watch_started = "" + (new Date());
 }
 

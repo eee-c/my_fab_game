@@ -44,10 +44,25 @@ Room.prototype.draw = function() {
     rect(0, 0, 500, 500, 4).
     attr({fill: "#fff", stroke: "none"});
 
-  // this.draw_player(this.player_list.me, '#000000');
+  $('<div id="chat">' +
+    '<form id="chat-form" action="#">' +
+    '<label for="change-message">Chat:</label>' +
+    '<input type="text" name="message" id="chat-message" />' +
+    '<input type="submit" name="commit" value="Go" />' +
+    '</form>' +
+    '</div>').insertAfter($(self.paper.canvas).parent());
 
-  // this.player_list.others().forEach(function(player) {
-  //   self.draw_player(player, '#aaaaaa');
-  // });
+  $('#chat-form').submit(function(e) {
+    self.subscribers.forEach(
+      function(subscriber) {
+        var event = {
+          type: "message",
+          value:  $('#chat-message').val()
+        };
+        subscriber.notify(event);
+        $('#chat-message').val('');
+      }
+    );
+    return false;
+  });
 };
-

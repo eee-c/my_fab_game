@@ -23,6 +23,10 @@ PlayerList.prototype.walk_player = function(attrs) {
   }
 };
 
+PlayerList.prototype.player_say = function(attrs) {
+  alert(attrs.id + " says " + attrs.say);
+};
+
 PlayerList.prototype.add_player = function(obj) {
   if (!this.other_players[obj.id] && obj.id != this.me.id) {
     var player = new Player(obj.id, obj);

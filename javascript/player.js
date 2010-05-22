@@ -12,8 +12,16 @@ Player.prototype.notify = function(evt) {
     case "click":
       this.stop();
       this.walk_to(evt.x, evt.y);
-      this.notify_server({id:this.id,x:evt.x, y:evt.y});
+      this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
       break;
+    case "message":
+      this.stop();
+      this.walk_to(this.x, this.y);
+      this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
+      this.notify_server('chat', {id:this.id, say:evt.value});
+      break;
+    default:
+      console.debug("[notify] type: " + evt.type + " value: " + evt.value);
   }
 };
 
@@ -51,6 +59,6 @@ Player.prototype.attach_drawable = function(drawable) {
   });
 };
 
-Player.prototype.notify_server = function(change) {
-  $.post("/move", JSON.stringify(change));
+Player.prototype.notify_server = function(action, change) {
+  $.post("/" + action, JSON.stringify(change));
 };
