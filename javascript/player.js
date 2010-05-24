@@ -41,6 +41,15 @@ Player.prototype.walk_to = function(x, y) {
   this.y = y;
 };
 
+Player.prototype.say = function(message) {
+  var self = this;
+
+  if (this.balloon) this.balloon.remove();
+
+  this.balloon = this.drawable.paper.text(this.x, this.y - 10, message);
+  setTimeout(function(){self.balloon.remove();}, 10*1000);
+};
+
 Player.prototype.quit = function() {
   this.drawable.remove();
   this.label.remove();
@@ -50,12 +59,16 @@ Player.prototype.quit = function() {
 };
 
 Player.prototype.attach_drawable = function(drawable) {
+  var self = this;
   this.drawable = drawable;
-  var label = drawable.paper.text(this.x, this.y + 10, this.id);
-  this.label = label;
+  this.label = drawable.paper.text(this.x, this.y + 10, this.id);
 
   drawable.onAnimation(function(){
-    label.attr({x: drawable.attr("cx"), y: drawable.attr("cy") + 10});
+    self.label.attr({x: drawable.attr("cx"), y: drawable.attr("cy") + 10});
+
+    if (self.balloon) {
+      self.balloon.attr({x: drawable.attr("cx"), y: drawable.attr("cy") - 10});
+    }
   });
 };
 

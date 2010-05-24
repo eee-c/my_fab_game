@@ -19,12 +19,12 @@ PlayerList.prototype.walk_player = function(attrs) {
   if (player) {
     player.stop();
     player.walk_to(attrs.x, attrs.y);
-
   }
 };
 
 PlayerList.prototype.player_say = function(attrs) {
-  alert(attrs.id + " says " + attrs.say);
+  //console.debug(attrs);
+  this.get_player(attrs.id).say(attrs.say);
 };
 
 PlayerList.prototype.add_player = function(obj) {
@@ -52,6 +52,7 @@ PlayerList.prototype.remove_player = function(id) {
 };
 
 PlayerList.prototype.get_player = function(id) {
+  if (this.me.id == id) return this.me;
   return this.other_players[id];
 };
 
