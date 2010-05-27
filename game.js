@@ -1,4 +1,6 @@
-var puts = require( "sys" ).puts;
+var puts = require( "sys" ).puts,
+    player_from_querystring = require('./lib/player_from_querystring').app;
+
 var players = {};
 
 with ( require( "fab" ) )
@@ -147,20 +149,6 @@ function drop_player(id) {
   delete players[id];
 }
 
-function player_from_querystring() {
-  var out = this;
-  return function(head) {
-    if (head.url.search) {
-      var search = head.url.search.substring(1);
-      var q = require('querystring').parse(search);
-      var app = out({ body: {id: q.player, x: q.x || 0, y: q.y || 0} });
-      if ( app ) app();
-    }
-    else {
-      out();
-    }
-  };
-}
 
 function player_status () {
   var out = this;
@@ -177,3 +165,4 @@ function player_status () {
   }
   out();
 }
+
