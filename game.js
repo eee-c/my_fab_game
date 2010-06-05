@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var puts = require( "sys" ).puts,
     player_from_querystring = require('./lib/player_from_querystring').app,
     init_comet = require('./lib/init_comet').app;
