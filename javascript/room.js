@@ -30,8 +30,8 @@ Room.prototype.decorate_event = function(evt) {
 };
 
 Room.prototype.draw_player = function(player, color) {
-  var c = this.paper.circle(player.x, player.y, 3);
-  c.attr({fill: color, opacity: 0.5});
+  var c = this.paper.circle(player.x, player.y, 10);
+  c.attr({fill: color, "fill-opacity": 0.5, stroke: '#000', "stroke-width": 2, "stroke-opacity": 1.0});
   return c;
 };
 

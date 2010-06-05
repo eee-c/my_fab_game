@@ -5,6 +5,8 @@ var Player = function(id, options) {
   if (!options) options = {};
   this.x = options.x || 250;
   this.y = options.y || 250;
+
+  this.animate_with = options.animate_with || function (avatar) { };
 };
 
 Player.prototype.notify = function(evt) {
@@ -26,16 +28,16 @@ Player.prototype.notify = function(evt) {
 };
 
 Player.prototype.stop = function () {
-  this.drawable.stop();
+  this.avatar.stop();
 
-  this.x = this.drawable.attrs.cx;
-  this.y = this.drawable.attrs.cy;
+  this.x = this.avatar.attrs.cx;
+  this.y = this.avatar.attrs.cy;
 };
 
 Player.prototype.walk_to = function(x, y) {
   var p = "M"+ this.x + " " + this.y +
           "L" +     x + " " +      y;
-  this.drawable.animateAlong(p, 3000);
+  this.avatar.animateAlong(p, 3000);
 
   this.x = x;
   this.y = y;
@@ -46,28 +48,38 @@ Player.prototype.say = function(message) {
 
   if (this.balloon) this.balloon.remove();
 
-  this.balloon = this.drawable.paper.text(this.x, this.y - 10, message);
+  this.balloon = this.avatar.paper
+    .text(this.x, this.y - 30, message)
+    .attr({"font-size": 12});
   setTimeout(function(){self.balloon.remove();}, 10*1000);
 };
 
 Player.prototype.quit = function() {
-  this.drawable.remove();
+  this.avatar.remove();
   this.label.remove();
   delete this.x;
   delete this.y;
   delete this.id;
 };
 
-Player.prototype.attach_drawable = function(drawable) {
+Player.prototype.attach_avatar = function(avatar) {
   var self = this;
-  this.drawable = drawable;
-  this.label = drawable.paper.text(this.x, this.y + 10, this.id);
+  this.avatar = avatar;
+  this.label = avatar.paper
+    .text(this.x, this.y + 20, this.id)
+    .attr({"font-size": 12});
 
-  drawable.onAnimation(function(){
-    self.label.attr({x: drawable.attr("cx"), y: drawable.attr("cy") + 10});
+  var animation_count = 0;
+  avatar.onAnimation(function(){
+    self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + 20});
+
+    if (++animation_count > 25) {
+      self.animate_with(this);
+      animation_count = 0;
+    }
 
     if (self.balloon) {
-      self.balloon.attr({x: drawable.attr("cx"), y: drawable.attr("cy") - 10});
+      self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - 20});
     }
   });
 };

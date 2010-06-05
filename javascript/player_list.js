@@ -5,7 +5,7 @@ var PlayerList = function(me, room, options) {
   room.add_subscriber(me);
 
   var el = room.draw_player(me, '#000000');
-  me.attach_drawable(el);
+  me.attach_avatar(el);
 
   this.other_players = {};
 
@@ -32,7 +32,7 @@ PlayerList.prototype.add_player = function(obj) {
     var player = new Player(obj.id, obj);
     this.other_players[obj.id] = player;
     var el = this.room.draw_player(player, '#999999');
-    player.attach_drawable(el);
+    player.attach_avatar(el);
   }
 };
 
