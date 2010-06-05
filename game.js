@@ -119,9 +119,6 @@ function broadcast_new (app) {
         broadcast(comet_walk_player(JSON.stringify(obj.body)));
       }
       else {
-        for (var prop in obj) {
-          puts(" * " + prop + ": " + obj[prop]);
-        }
         downstream = out(obj);
       }
       return listener;
@@ -135,17 +132,11 @@ function add_player (app) {
 
     return app.call( function listener(obj) {
       if (obj && obj.body) {
-        // for (var id in players) {
-        //   out({body: comet_walk_player(JSON.stringify(players[id].status))});
-        // }
-
         var new_id = obj.body.id;
         puts("adding: " + new_id);
         players[new_id] = {status: obj.body, listener: out};
 
         idle_watch(new_id);
-
-        //broadcast(comet_walk_player(JSON.stringify(obj.body)));
       }
       out(obj);
       return listener;
