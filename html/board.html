@@ -18,7 +18,10 @@ $(function() {
   if (kv[0] == 'player' && kv[1]) {
     $('#login').hide();
 
-    var me = new Player(kv[1]);
+    var me = new Player(kv[1], {animate_with: function(avatar){
+      var color = ["#ccc", "#c00", "#0c0"][Math.floor(3*Math.random(3))];
+      avatar.attr({fill: color});
+    } });
     $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
 
     var room = new Room($("#room-container")[0]);
