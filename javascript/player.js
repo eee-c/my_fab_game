@@ -9,6 +9,9 @@ var Player = function(id, options) {
   this.animate_with = options.animate_with || function (avatar) { };
 };
 
+Player.max_walk = Math.sqrt(500*500 + 500*500);
+Player.time_to_max_walk = 5 * 1000;
+
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
@@ -37,7 +40,13 @@ Player.prototype.stop = function () {
 Player.prototype.walk_to = function(x, y) {
   var p = "M"+ this.x + " " + this.y +
           "L" +     x + " " +      y;
-  this.avatar.animateAlong(p, 3000);
+
+  var x_diff = x - this.x;
+  var y_diff = y - this.y;
+  var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
+  var time = Player.time_to_max_walk * ( distance / Player.max_walk );
+  console.debug("walk_time: " + time);
+  this.avatar.animateAlong(p, time);
 
   this.x = x;
   this.y = y;
