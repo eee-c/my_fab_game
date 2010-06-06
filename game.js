@@ -74,8 +74,13 @@ function broadcast(comet_command) {
 }
 
 function update_player_status(status) {
-  puts("updating player status: " + status.id);
-  players[status.id].status = status;
+  if (players[status.id]) {
+    puts("[update_player_status] " + status.id);
+    players[status.id].status = status;
+  }
+  else {
+    puts("[update_player_status] unknown player" + status.id + "!");
+  }
   idle_watch(status.id);
 }
 
