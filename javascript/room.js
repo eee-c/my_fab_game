@@ -22,10 +22,23 @@ Room.prototype.init_events = function() {
 };
 
 Room.prototype.decorate_event = function(evt) {
+  var x = evt.pageX - $(this.container).offset().left;
+
+  if (x < 0)
+    x = 0;
+  else if (x > this.paper.width)
+    x = this.paper.width;
+
+  var y = evt.pageY - $(this.container).offset().top;
+  if (y < 0)
+    y = 0;
+  else if (y > this.paper.width)
+    y = this.paper.width;
+
   return {
     type: evt.type,
-    x: evt.pageX - $(this.container).offset().left,
-    y: evt.pageY - $(this.container).offset().top
+    x: x,
+    y: y
   };
 };
 
