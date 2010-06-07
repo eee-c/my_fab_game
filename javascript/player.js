@@ -20,9 +20,6 @@ Player.prototype.notify = function(evt) {
       this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
       break;
     case "message":
-      this.stop();
-      this.walk_to(this.x, this.y);
-      this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
       this.notify_server('chat', {id:this.id, say:evt.value});
       break;
     default:
