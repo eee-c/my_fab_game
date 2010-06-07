@@ -158,6 +158,9 @@ function idle_watch(id) {
     puts("timeout " + id +"!");
     drop_player(id);
   }, 30*60*1000);
+
+  setTimeout(function(){keepalive(id);}, 30*1000);
+
   players[id].idle_watch_started = "" + (new Date());
 }
 
@@ -167,6 +170,13 @@ function drop_player(id) {
   delete players[id];
 }
 
+function keepalive(id) {
+  if (players[id]) {
+    puts("keepalive: " + id);
+    players[id].listener({body: '<script type="text/javascript">"12345789 "</script>' + "\n"});
+    setTimeout(function(){keepalive(id);}, 30*1000);
+  }
+}
 
 function player_status () {
   var out = this;
