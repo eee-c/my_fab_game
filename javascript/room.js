@@ -60,7 +60,7 @@ Room.prototype.draw = function() {
   $('<div id="chat">' +
     '<form id="chat-form" action="#">' +
     '<label for="change-message">Chat:</label>' +
-    '<input type="text" name="message" id="chat-message" />' +
+    '<input type="text" name="message" id="chat-message" size="60" maxlength="100" />' +
     '<input type="submit" name="commit" value="Go" />' +
     '</form>' +
     '</div>').insertAfter($(self.paper.canvas).parent());

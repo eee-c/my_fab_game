@@ -31,17 +31,15 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            broadcast(comet_player_say(obj.body));
+            broadcast(comet_player_say(obj.body.substr(0,100));
           }
           return listener;
         };
       } )
 
-
   ( /^\/comet_view/ )
     ( broadcast_new )
     ( init_comet )
-//    ( add_player )
     ( player_from_querystring )
 
   ( /^\/status/ )
