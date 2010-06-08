@@ -9,6 +9,8 @@ var Player = function(id, options) {
   this.animate_with = options.animate_with || function (avatar) { };
 };
 
+Player.radius = 10;
+Player.shadow_distance = 20;
 Player.max_walk = Math.sqrt(500*500 + 500*500);
 Player.time_to_max_walk = 5 * 1000;
 
@@ -55,7 +57,7 @@ Player.prototype.say = function(message) {
   if (this.balloon) this.balloon.remove();
 
   this.balloon = this.avatar.paper
-    .text(this.x, this.y - 30, message)
+    .text(this.x, this.y - Player.shadow_distance, message)
     .attr({"font-size": 12});
   setTimeout(function(){self.balloon.remove();}, 10*1000);
 };
@@ -72,12 +74,12 @@ Player.prototype.attach_avatar = function(avatar) {
   var self = this;
   this.avatar = avatar;
   this.label = avatar.paper
-    .text(this.x, this.y + 20, this.id)
+    .text(this.x, this.y + Player.shadow_distance, this.id)
     .attr({"font-size": 12});
 
   var animation_count = 0;
   avatar.onAnimation(function(){
-    self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + 20});
+    self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
 
     if (++animation_count > 25) {
       self.animate_with(this);
@@ -85,7 +87,7 @@ Player.prototype.attach_avatar = function(avatar) {
     }
 
     if (self.balloon) {
-      self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - 20});
+      self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
     }
   });
 };
