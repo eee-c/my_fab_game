@@ -31,7 +31,7 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            broadcast(comet_player_say(obj.body.substr(0,100));
+            broadcast(comet_player_say(obj.body.substr(0,100)));
           }
           return listener;
         };
@@ -101,6 +101,7 @@ function comet_quit_player(id) {
   return comet_wrap('player_list.remove_player("'+ id +'")');
 }
 
+// TODO: test and/or shrink
 function broadcast_new (app) {
   return function () {
     var out = this;
@@ -117,6 +118,8 @@ function broadcast_new (app) {
         players[new_id] = {status: obj.body, listener: out};
 
         idle_watch(new_id);
+
+        setTimeout(function(){keepalive(new_id);}, 30*1000);
 
         puts("broadcasting about: " + new_id);
         broadcast(comet_walk_player(JSON.stringify(obj.body)));
