@@ -31,7 +31,9 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            broadcast(comet_player_say(obj.body.substr(0,100)));
+            var msg = JSON.parse(obj.body.toString());
+            msg.body = msg.say.substr(0,100);
+            broadcast(comet_player_say(JSON.stringify(msg)));
           }
           return listener;
         };
