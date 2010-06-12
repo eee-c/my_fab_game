@@ -22,7 +22,6 @@ $(function() {
       var color = ["#ccc", "#c00", "#0c0"][Math.floor(3*Math.random(3))];
       avatar.attr({fill: color});
     } });
-    $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
 
     var room = new Room($("#room-container")[0]);
     function goodbye(){
@@ -30,6 +29,8 @@ $(function() {
       window.location = window.location.protocol + '//' + window.location.host + window.location.pathname;
     };
     player_list = new PlayerList(me, room, {onComplete: goodbye});
+
+    $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
   }
 });
   </script>

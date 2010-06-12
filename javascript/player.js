@@ -37,15 +37,28 @@ Player.prototype.stop = function () {
 };
 
 Player.prototype.walk_to = function(x, y) {
-  var p = "M"+ this.x + " " + this.y +
-          "L" +     x + " " +      y;
+  var p = "M"+ Math.floor(this.x) + " " + Math.floor(this.y) +
+          " L" +     x + " " +      y;
 
   var x_diff = x - this.x;
   var y_diff = y - this.y;
   var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
-  console.debug("walk_time: " + time);
+  console.debug("id: " + this.id + ", x : " + x + ", y: " + y);
+  console.debug("id: " + this.id + ", x : " + this.x + ", y: " + this.y);
+  console.debug("id: " + this.id + ", cx : " + this.avatar.attrs.cx + ", cy: " + this.avatar.attrs.cy);
+  console.debug("id: " + this.id + ", x_diff : " + x_diff + ", y_diff: " + y_diff);
+  console.debug("walk: " + p + ", distance: " + distance + ", time: " + time);
   this.avatar.animateAlong(p, time);
+
+  var self = this;
+  setTimeout(function() {
+    console.debug("id: " + self.id + ", x : " + x + ", y: " + y);
+    console.debug("id: " + self.id + ", x : " + self.x + ", y: " + self.y);
+    console.debug("id: " + self.id + ", cx : " + self.avatar.attrs.cx + ", cy: " + self.avatar.attrs.cy);
+    console.debug("id: " + self.id + ", x_diff : " + x_diff + ", y_diff: " + y_diff);
+    console.debug("walk: " + p + ", distance: " + distance + ", time: " + time);
+  }, 100);
 
   this.x = x;
   this.y = y;
@@ -81,10 +94,10 @@ Player.prototype.attach_avatar = function(avatar) {
   avatar.onAnimation(function(){
     self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
 
-    if (++animation_count > 25) {
+    // if (++animation_count > 25) {
       self.animate_with(this);
-      animation_count = 0;
-    }
+    //   animation_count = 0;
+    // }
 
     if (self.balloon) {
       self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});

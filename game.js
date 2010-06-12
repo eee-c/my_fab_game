@@ -91,6 +91,10 @@ function comet_wrap(js) {
          '</script>' + "\n";
 }
 
+function comet_new_player(player_string) {
+  return comet_wrap('player_list.new_player('+ player_string +')');
+}
+
 function comet_walk_player(player_string) {
   return comet_wrap('player_list.walk_player('+ player_string +')');
 }
@@ -112,7 +116,7 @@ function broadcast_new (app) {
     return app.call( function listener(obj) {
       if (obj && obj.body && obj.body.id) {
         for (var id in players) {
-          out({body: comet_walk_player(JSON.stringify(players[id].status))});
+          out({body: comet_new_player(JSON.stringify(players[id].status))});
         }
 
         var new_id = obj.body.id;
@@ -124,7 +128,7 @@ function broadcast_new (app) {
         setTimeout(function(){keepalive(new_id);}, 30*1000);
 
         puts("broadcasting about: " + new_id);
-        broadcast(comet_walk_player(JSON.stringify(obj.body)));
+        broadcast(comet_new_player(JSON.stringify(obj.body)));
       }
       else {
         downstream = out(obj);

@@ -2,24 +2,23 @@ var PlayerList = function(me, room, options) {
   this.me = me;
   this.room = room;
 
+  this.players = {};
+  this.add_player(me, '#000000');
+
   room.add_subscriber(me);
-
-  var el = room.draw_player(me, '#000000');
-  me.attach_avatar(el);
-
-  this.other_players = {};
 
   if (!options) options = {};
   this.onComplete = options.onComplete || function() {};
 };
 
 PlayerList.prototype.walk_player = function(attrs) {
-  this.add_player(attrs);
   var player = this.get_player(attrs.id);
   if (player) {
     player.stop();
     player.walk_to(attrs.x, attrs.y);
+    console.debug("[player_list.walk_player] id: " + player.id + ", x : " + player.avatar.attrs.cx + ", y: " + player.avatar.attrs.cy);
   }
+  console.debug("[player_list.walk_player] me: " + this.me.id + ", x : " + this.me.avatar.attrs.cx + ", y: " + this.me.avatar.attrs.cy);
 };
 
 PlayerList.prototype.player_say = function(attrs) {
@@ -27,39 +26,33 @@ PlayerList.prototype.player_say = function(attrs) {
   this.get_player(attrs.id).say(attrs.say);
 };
 
-PlayerList.prototype.add_player = function(obj) {
-  if (!this.other_players[obj.id] && obj.id != this.me.id) {
-    var player = new Player(obj.id, obj);
-    this.other_players[obj.id] = player;
-    var el = this.room.draw_player(player, '#999999');
-    player.attach_avatar(el);
+PlayerList.prototype.new_player = function(obj) {
+  if (!this.players[obj.id]) {
+    this.add_player(new Player(obj.id, obj));
   }
+};
+
+PlayerList.prototype.add_player = function(player, color) {
+  this.players[player.id] = player;
+  if (!color) color = '#999999';
+  var el = this.room.draw_player(player, color);
+  player.attach_avatar(el);
 };
 
 PlayerList.prototype.remove_player = function(id) {
   if (this.me.id == id) {
     // I am leaving and so is everyone else (as far as I'm concerned)
-    this.me.quit();
-    for (var oid in this.other_players) {
-      this.other_players[oid].quit();
+    for (var pid in this.players) {
+      this.players[pid].quit();
     }
     this.onComplete();
   }
   else {
     this.get_player(id).quit();
-    delete this.other_players[id];
+    delete this.players[id];
   }
 };
 
 PlayerList.prototype.get_player = function(id) {
-  if (this.me.id == id) return this.me;
-  return this.other_players[id];
-};
-
-PlayerList.prototype.others = function() {
-  var ret = [];
-  for (var id in this.other_players) {
-    ret.push(this.other_players[id]);
-  }
-  return ret;
+  return this.players[id];
 };
