@@ -16,13 +16,10 @@ PlayerList.prototype.walk_player = function(attrs) {
   if (player) {
     player.stop();
     player.walk_to(attrs.x, attrs.y);
-    console.debug("[player_list.walk_player] id: " + player.id + ", x : " + player.avatar.attrs.cx + ", y: " + player.avatar.attrs.cy);
   }
-  console.debug("[player_list.walk_player] me: " + this.me.id + ", x : " + this.me.avatar.attrs.cx + ", y: " + this.me.avatar.attrs.cy);
 };
 
 PlayerList.prototype.player_say = function(attrs) {
-  //console.debug(attrs);
   this.get_player(attrs.id).say(attrs.say);
 };
 

@@ -44,21 +44,7 @@ Player.prototype.walk_to = function(x, y) {
   var y_diff = y - this.y;
   var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
-  console.debug("id: " + this.id + ", x : " + x + ", y: " + y);
-  console.debug("id: " + this.id + ", x : " + this.x + ", y: " + this.y);
-  console.debug("id: " + this.id + ", cx : " + this.avatar.attrs.cx + ", cy: " + this.avatar.attrs.cy);
-  console.debug("id: " + this.id + ", x_diff : " + x_diff + ", y_diff: " + y_diff);
-  console.debug("walk: " + p + ", distance: " + distance + ", time: " + time);
   this.avatar.animateAlong(p, time);
-
-  var self = this;
-  setTimeout(function() {
-    console.debug("id: " + self.id + ", x : " + x + ", y: " + y);
-    console.debug("id: " + self.id + ", x : " + self.x + ", y: " + self.y);
-    console.debug("id: " + self.id + ", cx : " + self.avatar.attrs.cx + ", cy: " + self.avatar.attrs.cy);
-    console.debug("id: " + self.id + ", x_diff : " + x_diff + ", y_diff: " + y_diff);
-    console.debug("walk: " + p + ", distance: " + distance + ", time: " + time);
-  }, 100);
 
   this.x = x;
   this.y = y;

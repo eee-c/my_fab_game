@@ -43,10 +43,8 @@ Room.prototype.decorate_event = function(evt) {
 };
 
 Room.prototype.draw_player = function(player, color) {
-  console.debug("[draw_player] id: " + player.id + ", x : " + player.x + ", y: " + player.y);
   var c = this.paper.circle(player.x, player.y, 10);
   c.attr({fill: color, "fill-opacity": 0.5, stroke: '#000', "stroke-width": 2, "stroke-opacity": 1.0});
-  console.debug("[draw_player] id: " + player.id + ", x : " + c.attrs.cx + ", y: " + c.attrs.cy);
   return c;
 };
 
