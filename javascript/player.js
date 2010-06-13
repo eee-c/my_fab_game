@@ -80,10 +80,10 @@ Player.prototype.attach_avatar = function(avatar) {
   avatar.onAnimation(function(){
     self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
 
-    // if (++animation_count > 25) {
+    if (++animation_count > 25) {
       self.animate_with(this);
-    //   animation_count = 0;
-    // }
+      animation_count = 0;
+    }
 
     if (self.balloon) {
       self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
