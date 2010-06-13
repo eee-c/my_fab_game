@@ -88,6 +88,16 @@ Player.prototype.attach_avatar = function(avatar) {
     if (self.balloon) {
       self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
     }
+
+    var c_el = document.elementFromPoint(avatar.attr("cx") + 8,
+                                         avatar.attr("cy") + 8);
+
+    if (c_el != self.avatar.node &&
+        c_el != self.avatar.paper) {
+      console.debug(c_el);
+      console.debug(self.avatar);
+      this.stop();
+    }
   });
 };
 
