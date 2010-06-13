@@ -77,11 +77,11 @@ function update_player_status(status) {
   if (players[status.id]) {
     puts("[update_player_status] " + status.id);
     players[status.id].status = status;
+    idle_watch(status.id);
   }
   else {
-    puts("[update_player_status] unknown player" + status.id + "!");
+    puts("[update_player_status] unknown player: " + status.id + "!");
   }
-  idle_watch(status.id);
 }
 
 function comet_wrap(js) {
