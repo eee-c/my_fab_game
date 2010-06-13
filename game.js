@@ -112,26 +112,28 @@ function broadcast_new (app) {
   return function () {
     var out = this;
 
-    var downstream;
     return app.call( function listener(obj) {
       if (obj && obj.body && obj.body.id) {
+        var new_id = obj.body.id;
+
         for (var id in players) {
           out({body: comet_new_player(JSON.stringify(players[id].status))});
         }
 
-        var new_id = obj.body.id;
-        puts("adding: " + new_id);
-        players[new_id] = {status: obj.body, listener: out};
+        if (!players[new_id]) {
+          puts("[broadcast_new] adding: " + new_id);
+          players[new_id] = {status: obj.body, listener: out};
 
-        idle_watch(new_id);
+          idle_watch(new_id);
 
-        setTimeout(function(){keepalive(new_id);}, 30*1000);
+          setTimeout(function(){keepalive(new_id);}, 30*1000);
 
-        puts("broadcasting about: " + new_id);
-        broadcast(comet_new_player(JSON.stringify(obj.body)));
+          puts("[broadcast_new] broadcasting about: " + new_id);
+          broadcast(comet_new_player(JSON.stringify(obj.body)));
+        }
       }
       else {
-        downstream = out(obj);
+        out(obj);
       }
       return listener;
     });
@@ -166,8 +168,6 @@ function idle_watch(id) {
     drop_player(id);
   }, 30*60*1000);
 
-  setTimeout(function(){keepalive(id);}, 30*1000);
-
   players[id].idle_watch_started = "" + (new Date());
 }
 
@@ -179,7 +179,6 @@ function drop_player(id) {
 
 function keepalive(id) {
   if (players[id]) {
-    puts("keepalive: " + id);
     players[id].listener({body: '<script type="text/javascript">"12345789 "</script>' + "\n"});
     setTimeout(function(){keepalive(id);}, 30*1000);
   }
