@@ -36,6 +36,19 @@ Player.prototype.stop = function () {
   this.y = this.avatar.attrs.cy;
 };
 
+Player.prototype.bounce_away = function() {
+  this.mid_bounce = true;
+  var x = this.x + 2*Player.radius,
+      y = this.y;
+
+  var self = this;
+  this.avatar.animate({cx: x, cy: y}, 500, "bounce",
+                      function(){self.mid_bounce = false;});
+
+  this.x = x;
+  this.y = y;
+};
+
 Player.prototype.walk_to = function(x, y) {
   var p = "M"+ Math.floor(this.x) + " " + Math.floor(this.y) +
           " L" +     x + " " +      y;
@@ -92,11 +105,13 @@ Player.prototype.attach_avatar = function(avatar) {
     var c_el = document.elementFromPoint(avatar.attr("cx") + 8,
                                          avatar.attr("cy") + 8);
 
-    if (c_el != self.avatar.node &&
+    if (!self.mid_bounce &&
+        c_el != self.avatar.node &&
         c_el != self.avatar.paper) {
       console.debug(c_el);
       console.debug(self.avatar);
-      this.stop();
+      self.stop();
+      self.bounce_away();
     }
   });
 };
