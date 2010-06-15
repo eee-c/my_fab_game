@@ -38,8 +38,8 @@ Player.prototype.stop = function () {
 
 Player.prototype.bounce_away = function() {
   this.mid_bounce = true;
-  var x = this.x + 2*Player.radius,
-      y = this.y;
+  var x = this.x - 2*Player.radius*this.direction.x,
+      y = this.y - 2*Player.radius*this.direction.y;
 
   var self = this;
   this.avatar.animate({cx: x, cy: y}, 500, "bounce",
@@ -56,6 +56,8 @@ Player.prototype.walk_to = function(x, y) {
   var x_diff = x - this.x;
   var y_diff = y - this.y;
   var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
+  this.direction = {x: x_diff/distance, y: y_diff/distance};
+
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
   this.avatar.animateAlong(p, time);
 
