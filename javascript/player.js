@@ -9,6 +9,7 @@ var Player = function(id, options) {
   this.direction = { x: 1, y: 0 };
 
   this.animate_with = options.animate_with || function (avatar) { };
+  this.initial_walk = true;
 };
 
 Player.radius = 10;
@@ -19,8 +20,6 @@ Player.time_to_max_walk = 5 * 1000;
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
-      this.stop();
-      this.walk_to(evt.x, evt.y);
       this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
       break;
     case "message":
@@ -59,6 +58,8 @@ Player.prototype.bounce_to = function(x, y) {
 
 
 Player.prototype.walk_to = function(x, y) {
+  this.stop();
+
   var p = "M"+ Math.floor(this.x) + " " + Math.floor(this.y) +
           " L" +     x + " " +      y;
 
@@ -68,7 +69,11 @@ Player.prototype.walk_to = function(x, y) {
   this.direction = {x: x_diff/distance, y: y_diff/distance};
 
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
-  this.avatar.animateAlong(p, time);
+
+  var self = this;
+  this.avatar.animateAlong(p, time, function(){
+    self.initial_walk = false;
+  });
 
   this.x = x;
   this.y = y;
@@ -116,9 +121,12 @@ Player.prototype.attach_avatar = function(avatar) {
     var c_el = document.elementFromPoint(avatar.attr("cx") + 8,
                                          avatar.attr("cy") + 8);
 
-    if (!self.mid_bounce &&
+    if (!self.initial_walk &&
+        !self.mid_bounce &&
         c_el != self.avatar.node &&
-        c_el != self.avatar.paper) {
+        c_el != self.avatar.paper.bottom.node) {
+      // console.debug(c_el);
+      // console.debug(self.avatar);
       self.stop();
       self.bounce_away();
     }
