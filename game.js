@@ -46,8 +46,16 @@ with ( require( "fab" ) )
         return function listener( obj ) {
           if ( !obj ) out();
           else if ( obj.body ) {
-            broadcast(comet_bounce_player(obj.body));
-            update_player_status(JSON.parse(""+obj.body));
+            try {
+              update_player_status(JSON.parse(""+obj.body));
+              broadcast(comet_bounce_player(obj.body));
+            } catch (e) {
+              puts("[bounce_handler] error type: " + e.type +
+                   ", message: " + e.message);
+            }
+            finally {
+              out();
+            }
           }
           return listener;
         };
