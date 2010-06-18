@@ -12,6 +12,7 @@ with ( require( "fab" ) )
 
   ( listen, 0xFAB )
 
+  // TODO: These broadcast resources are not DRY
   ( /move/ )
     ( function() {
         var out = this;
@@ -34,6 +35,19 @@ with ( require( "fab" ) )
             var msg = JSON.parse(obj.body.toString());
             msg.body = msg.say.substr(0,100);
             broadcast(comet_player_say(JSON.stringify(msg)));
+          }
+          return listener;
+        };
+      } )
+
+  ( /bounce/ )
+    ( function() {
+        var out = this;
+        return function listener( obj ) {
+          if ( !obj ) out();
+          else if ( obj.body ) {
+            broadcast(comet_bounce_player(obj.body));
+            update_player_status(JSON.parse(""+obj.body));
           }
           return listener;
         };
@@ -97,6 +111,10 @@ function comet_new_player(player_string) {
 
 function comet_walk_player(player_string) {
   return comet_wrap('player_list.walk_player('+ player_string +')');
+}
+
+function comet_bounce_player(player_string) {
+  return comet_wrap('player_list.bounce_player('+ player_string +')');
 }
 
 function comet_player_say(player_string) {

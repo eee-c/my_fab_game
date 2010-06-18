@@ -19,6 +19,14 @@ PlayerList.prototype.walk_player = function(attrs) {
   }
 };
 
+PlayerList.prototype.bounce_player = function(attrs) {
+  var player = this.get_player(attrs.id);
+  if (player) {
+    player.stop();
+    player.bounce_to(attrs.x, attrs.y);
+  }
+};
+
 PlayerList.prototype.player_say = function(attrs) {
   this.get_player(attrs.id).say(attrs.say);
 };

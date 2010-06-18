@@ -6,6 +6,8 @@ var Player = function(id, options) {
   this.x = options.x || 250;
   this.y = options.y || 250;
 
+  this.direction = { x: 1, y: 0 };
+
   this.animate_with = options.animate_with || function (avatar) { };
 };
 
@@ -28,7 +30,6 @@ Player.prototype.notify = function(evt) {
       console.debug("[notify] type: " + evt.type + " value: " + evt.value);
   }
 };
-
 Player.prototype.stop = function () {
   this.avatar.stop();
 
@@ -37,17 +38,25 @@ Player.prototype.stop = function () {
 };
 
 Player.prototype.bounce_away = function() {
-  this.mid_bounce = true;
   var x = this.x - 2*Player.radius*this.direction.x,
       y = this.y - 2*Player.radius*this.direction.y;
+
+  this.notify_server('bounce', {id: this.id, x: x, y: y});
+  this.bounce_to(x, y);
+};
+
+Player.prototype.bounce_to = function(x, y) {
+  this.mid_bounce = true;
 
   var self = this;
   this.avatar.animate({cx: x, cy: y}, 500, "bounce",
                       function(){self.mid_bounce = false;});
+  setTimeout(function(){ self.mid_bounce = false; }, 1000);
 
   this.x = x;
   this.y = y;
 };
+
 
 Player.prototype.walk_to = function(x, y) {
   var p = "M"+ Math.floor(this.x) + " " + Math.floor(this.y) +
@@ -110,8 +119,6 @@ Player.prototype.attach_avatar = function(avatar) {
     if (!self.mid_bounce &&
         c_el != self.avatar.node &&
         c_el != self.avatar.paper) {
-      console.debug(c_el);
-      console.debug(self.avatar);
       self.stop();
       self.bounce_away();
     }
