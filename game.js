@@ -2,7 +2,8 @@
 
 var puts = require( "sys" ).puts,
     player_from_querystring = require('./lib/player_from_querystring').app,
-    init_comet = require('./lib/init_comet').app;
+    init_comet = require('./lib/init_comet').app,
+    unary_try  = require('./lib/unary_try').app;
 
 var players = {};
 
@@ -12,54 +13,24 @@ with ( require( "fab" ) )
 
   ( listen, 0xFAB )
 
-  // TODO: These broadcast resources are not DRY
   ( /move/ )
-    ( function() {
-        var out = this;
-        return function listener( obj ) {
-          if ( !obj ) out();
-          else if ( obj.body ) {
-            broadcast(comet_walk_player(obj.body));
-            update_player_status(JSON.parse(""+obj.body));
-          }
-          return listener;
-        };
-      } )
+    ( unary_try( function () {
+        update_player_status(JSON.parse(""+this));
+        broadcast(comet_walk_player(this));
+      } ) )
 
   ( /chat/ )
-    ( function() {
-        var out = this;
-        return function listener( obj ) {
-          if ( !obj ) out();
-          else if ( obj.body ) {
-            var msg = JSON.parse(obj.body.toString());
-            msg.body = msg.say.substr(0,100);
-            broadcast(comet_player_say(JSON.stringify(msg)));
-          }
-          return listener;
-        };
-      } )
+    ( unary_try( function () {
+        var msg = JSON.parse(this.toString());
+        msg.body = msg.say.substr(0,100);
+        broadcast(comet_player_say(JSON.stringify(msg)));
+      } ) )
 
   ( /bounce/ )
-    ( function() {
-        var out = this;
-        return function listener( obj ) {
-          if ( !obj ) out();
-          else if ( obj.body ) {
-            try {
-              update_player_status(JSON.parse(""+obj.body));
-              broadcast(comet_bounce_player(obj.body));
-            } catch (e) {
-              puts("[bounce_handler] error type: " + e.type +
-                   ", message: " + e.message);
-            }
-            finally {
-              out();
-            }
-          }
-          return listener;
-        };
-      } )
+     ( unary_try( function () {
+         update_player_status(JSON.parse(""+this));
+         broadcast(comet_bounce_player(this));
+       } ) )
 
   ( /^\/comet_view/ )
     ( broadcast_new )
