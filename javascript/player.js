@@ -60,8 +60,8 @@ Player.prototype.bounce_to = function(x, y) {
 Player.prototype.walk_to = function(x, y) {
   this.stop();
 
-  var p = "M"+ Math.floor(this.x) + " " + Math.floor(this.y) +
-          " L" +     x + " " +      y;
+  var p = "M" + Math.floor(this.x) + " " + Math.floor(this.y) +
+         " L" +                 x  + " " +                 y;
 
   var x_diff = x - this.x;
   var y_diff = y - this.y;
