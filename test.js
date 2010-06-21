@@ -32,5 +32,8 @@ function test( build ) {
 var target_module = require('./lib/player_from_querystring');
 test(target_module);
 
-    target_module = require('./lib/init_comet');
+target_module = require('./lib/init_comet');
+test(target_module);
+
+target_module = require('./lib/unary_try');
 test(target_module);
