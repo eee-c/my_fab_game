@@ -118,8 +118,15 @@ Player.prototype.attach_avatar = function(avatar) {
       self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
     }
 
-    var c_el = document.elementFromPoint(avatar.attr("cx") + 8,
-                                         avatar.attr("cy") + 8);
+    var c_x = avatar.attr("cx") +
+              $(self.avatar.paper.canvas).parent().offset().left +
+              $(document).scrollLeft();
+
+    var c_y = avatar.attr("cy") +
+              $(self.avatar.paper.canvas).parent().offset().top +
+              $(document).scrollTop();
+
+    var c_el = document.elementFromPoint(c_x, c_y);
 
     if (!self.initial_walk &&
         !self.mid_bounce &&
