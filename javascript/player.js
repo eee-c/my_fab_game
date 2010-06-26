@@ -119,11 +119,11 @@ Player.prototype.attach_avatar = function(avatar) {
     }
 
     var c_x = avatar.attr("cx") +
-              $(self.avatar.paper.canvas).parent().offset().left +
+              $(self.avatar.paper.canvas).parent().offset().left -
               $(document).scrollLeft();
 
     var c_y = avatar.attr("cy") +
-              $(self.avatar.paper.canvas).parent().offset().top +
+              $(self.avatar.paper.canvas).parent().offset().top -
               $(document).scrollTop();
 
     var c_el = document.elementFromPoint(c_x, c_y);
@@ -132,7 +132,9 @@ Player.prototype.attach_avatar = function(avatar) {
         !self.mid_bounce &&
         c_el != self.avatar.node &&
         c_el != self.avatar.paper.bottom.node) {
+      // console.debug("Colliding element:");
       // console.debug(c_el);
+      // console.debug("Me:");
       // console.debug(self.avatar);
       self.stop();
       self.bounce_away();
