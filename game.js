@@ -117,17 +117,15 @@ function broadcast_new (app) {
           out({body: comet_new_player(JSON.stringify(players[id].status))});
         }
 
-        if (!players[new_id]) {
-          puts("[broadcast_new] adding: " + new_id);
-          players[new_id] = {status: obj.body, listener: out};
+        puts("[broadcast_new] adding: " + new_id);
+        players[new_id] = {status: obj.body, listener: out};
 
-          idle_watch(new_id);
+        idle_watch(new_id);
 
-          setTimeout(function(){keepalive(new_id);}, 30*1000);
+        setTimeout(function(){keepalive(new_id);}, 30*1000);
 
-          puts("[broadcast_new] broadcasting about: " + new_id);
-          broadcast(comet_new_player(JSON.stringify(obj.body)));
-        }
+        puts("[broadcast_new] broadcasting about: " + new_id);
+        broadcast(comet_new_player(JSON.stringify(obj.body)));
       }
       else {
         out(obj);
