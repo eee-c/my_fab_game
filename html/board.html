@@ -25,7 +25,7 @@ $(function() {
     } });
 
     var room = new Room($("#room-container")[0]);
-    function goodbye(){
+    var goodbye = function() {
       alert("You have been logged out.");
       window.location = window.location.protocol + '//' + window.location.host + window.location.pathname;
     };
