@@ -111,21 +111,25 @@ function broadcast_new (app) {
 
     return app.call( function listener(obj) {
       if (obj && obj.body && obj.body.id) {
-        var new_id = obj.body.id;
-
         for (var id in players) {
           out({body: comet_new_player(JSON.stringify(players[id].status))});
         }
 
-        puts("[broadcast_new] adding: " + new_id);
-        players[new_id] = {status: obj.body, listener: out};
+        var new_id = obj.body.id;
+        if (!players[new_id]) {
+          puts("[broadcast_new] adding: " + new_id);
+          add_player(obj.body, out);
 
-        idle_watch(new_id);
-
-        setTimeout(function(){keepalive(new_id);}, 30*1000);
-
-        puts("[broadcast_new] broadcasting about: " + new_id);
-        broadcast(comet_new_player(JSON.stringify(obj.body)));
+          idle_watch(new_id);
+          setTimeout(function(){keepalive(new_id);}, 30*1000);
+        }
+        else if (players[new_id].uniq_id == obj.body.uniq_id) {
+          puts("[broadcast_new] refreshing session: " + new_id);
+          add_player(obj.body, out);
+        }
+        else {
+          out();
+        }
       }
       else {
         out(obj);
@@ -135,23 +139,18 @@ function broadcast_new (app) {
   };
 }
 
-function add_player (app) {
-  return function () {
-    var out = this;
-
-    return app.call( function listener(obj) {
-      if (obj && obj.body) {
-        var new_id = obj.body.id;
-        puts("adding: " + new_id);
-        players[new_id] = {status: obj.body, listener: out};
-
-        idle_watch(new_id);
-      }
-      out(obj);
-      return listener;
-    });
+function add_player(player, comet_stream) {
+  var new_id = player.id;
+  players[new_id] = {
+    status: player,
+    listener: comet_stream,
+    uniq_id: player.uniq_id
   };
+
+  puts("[broadcast_new] broadcasting about: " + new_id);
+  broadcast(comet_new_player(JSON.stringify(player)));
 }
+
 
 function idle_watch(id) {
   if (players[id].idle_timeout) {
