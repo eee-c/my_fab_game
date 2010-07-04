@@ -12,11 +12,10 @@ var suite = vows.describe('just_playing').
         function downstream (obj) { response = obj; }
 
         var upstream_listener = player_from_querystring.call(downstream);
-        var head = {
+        upstream_listener({
           url: { search : "?player=foo&x=1&y=2" },
           headers: { cookie: null }
-        };
-        upstream_listener(head);
+        });
 
         return response.body;
       },
