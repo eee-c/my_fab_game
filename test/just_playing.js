@@ -8,8 +8,8 @@ var suite = vows.describe('just_playing').
   addBatch({
     'with a query string': {
       topic: function() {
-        var player;
-        function downstream (obj) { if (obj) player = obj.body; }
+        var response;
+        function downstream (obj) { response = obj; }
 
         var upstream_listener = player_from_querystring.call(downstream);
         var head = {
@@ -18,7 +18,7 @@ var suite = vows.describe('just_playing').
         };
         upstream_listener(head);
 
-        return player;
+        return response.body;
       },
 
       'is player': function (player) {
