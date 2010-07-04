@@ -34,6 +34,7 @@ with ( require( "fab" ) )
 
   ( /^\/comet_view/ )
     ( broadcast_new )
+    ( store_player )
     ( init_comet )
     ( player_from_querystring )
 
@@ -104,7 +105,6 @@ function comet_quit_player(id) {
   return comet_wrap('player_list.remove_player("'+ id +'")');
 }
 
-// TODO: test and/or shrink
 function broadcast_new (app) {
   return function () {
     var out = this;
@@ -114,26 +114,39 @@ function broadcast_new (app) {
         for (var id in players) {
           out({body: comet_new_player(JSON.stringify(players[id].status))});
         }
+      }
+      else {
+        out(obj);
+      }
+      return listener;
+    });
+  };
+}
+ 
+function store_player (app) {
+  return function () {
+    var out = this;
 
+    return app.call( function listener(obj) {
+      if (obj && obj.body && obj.body.id) {
         var new_id = obj.body.id;
         if (!players[new_id]) {
-          puts("[broadcast_new] adding: " + new_id);
+          puts("[store_player] adding: " + new_id);
           add_player(obj.body, out);
 
           idle_watch(new_id);
           setTimeout(function(){keepalive(new_id);}, 30*1000);
         }
         else if (players[new_id].uniq_id == obj.body.uniq_id) {
-          puts("[broadcast_new] refreshing session: " + new_id);
+          puts("[store_player] refreshing session: " + new_id);
           add_player(obj.body, out);
         }
         else {
           out();
         }
       }
-      else {
-        out(obj);
-      }
+      out(obj);
+
       return listener;
     });
   };
@@ -147,7 +160,7 @@ function add_player(player, comet_stream) {
     uniq_id: player.uniq_id
   };
 
-  puts("[broadcast_new] broadcasting about: " + new_id);
+  puts("[add_player] broadcasting about: " + new_id);
   broadcast(comet_new_player(JSON.stringify(player)));
 }
 
