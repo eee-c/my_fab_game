@@ -43,6 +43,20 @@ var suite = vows.describe('player_from_querystring').
         assert.equal(player.y, 2);
       }
     },
+    'without explicit X-Y coordinates': {
+      topic: api.fab.send_obj({
+        url: { search : "?player=foo" },
+        headers: { cookie: null }
+      }),
+
+      'has X coordinate': function(player) {
+        assert.equal(player.x, 0);
+      },
+
+      'has Y coordinate': function(player) {
+        assert.equal(player.y, 0);
+      }
+    },
     'POSTing data': {
       topic: api.fab.send_obj({body: "foo"}),
 
