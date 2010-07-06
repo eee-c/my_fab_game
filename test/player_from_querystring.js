@@ -19,7 +19,7 @@ var api = {
   }
 };
 
-var suite = vows.describe('just_playing').
+var suite = vows.describe('player_from_querystring').
   addBatch({
     'with a query string': {
       topic: api.fab.send_obj({
