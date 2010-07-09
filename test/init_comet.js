@@ -43,13 +43,17 @@ var suite = vows.describe('init_comet').
       },
 
       'send 1000+ bytes to get Chrome\'s attention': function(chunks) {
-        var byte_count = 0;
-        for (var i=0; i < chunks.length; i++) {
-          var chunk = chunks[i];
-          if (chunk && chunk.body && typeof(chunk.body) == "string") {
-            byte_count = byte_count + chunk.body.length;
-          }
-        }
+        var byte_count = chunks.
+          filter(function(chunk) {
+            return chunk && (typeof(chunk.body) == "string");
+          }).
+          map(function(chunk) {
+            return chunk.body.length;
+          }).
+          reduce(function(memo, length) {
+            return memo + length;
+          });
+
         assert.isTrue(byte_count > 1000);
       },
 
