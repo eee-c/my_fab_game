@@ -3,7 +3,7 @@
 var puts = require( "sys" ).puts,
     player_from_querystring = require('./lib/player_from_querystring').app,
     init_comet = require('./lib/init_comet').app,
-    unary_try  = require('./lib/unary_try').app;
+    if_body  = require('./lib/if_body').app;
 
 var players = {};
 
@@ -14,23 +14,26 @@ with ( require( "fab" ) )
   ( listen, 0xFAB )
 
   ( /move/ )
-    ( unary_try( function () {
-        update_player_status(JSON.parse(""+this));
-        broadcast(comet_walk_player(this));
-      } ) )
+    ( if_body(
+        function () {
+          update_player_status(JSON.parse(""+this));
+          broadcast(comet_walk_player(this));
+        } ) )
 
   ( /chat/ )
-    ( unary_try( function () {
-        var msg = JSON.parse(this.toString());
-        msg.body = msg.say.substr(0,100);
-        broadcast(comet_player_say(JSON.stringify(msg)));
-      } ) )
+    ( if_body(
+        function () {
+          var msg = JSON.parse(this.toString());
+          msg.body = msg.say.substr(0,100);
+          broadcast(comet_player_say(JSON.stringify(msg)));
+        } ) )
 
   ( /bounce/ )
-     ( unary_try( function () {
-         update_player_status(JSON.parse(""+this));
-         broadcast(comet_bounce_player(this));
-       } ) )
+     ( if_body(
+         function () {
+           update_player_status(JSON.parse(""+this));
+           broadcast(comet_bounce_player(this));
+         } ) )
 
   ( /^\/comet_view/ )
     ( broadcast_new )
@@ -122,7 +125,7 @@ function broadcast_new (app) {
     });
   };
 }
- 
+
 function store_player (app) {
   return function () {
     var out = this;

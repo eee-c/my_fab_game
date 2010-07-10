@@ -3,14 +3,14 @@ var vows = require('vows'),
     puts = require('sys').puts;
 
 require.paths.push("lib");
-var unary_try = require('unary_try').app;
+var if_body = require('if_body').app;
 
 var api = {
   fab: {
     callback_when_send_obj: function(obj) {
       return function () {
         var topic = this;
-        var upstream_listener = unary_try(
+        var upstream_listener = if_body(
           function(obj) { topic.callback(null, obj); }
         ).call(function() {});
 
@@ -20,7 +20,7 @@ var api = {
     downstream_when_exception: function() {
       return function () {
         var topic = this;
-        var upstream_listener = unary_try(
+        var upstream_listener = if_body(
           function() { throw "Foo!"; }
         ).call(
           function(obj) { topic.callback(null, obj); }
@@ -32,7 +32,7 @@ var api = {
     downstream_when_send_obj: function(obj) {
       return function () {
         var topic = this;
-        var upstream_listener = unary_try(
+        var upstream_listener = if_body(
           function() {}
         ).call(
           function(obj) { topic.callback(null, obj); }
@@ -44,7 +44,7 @@ var api = {
   }
 };
 
-var suite = vows.describe('unary_try').
+var suite = vows.describe('if_body').
   addBatch({
     'callback, with a body': {
       topic: api.fab.callback_when_send_obj({body: "foo"}),
