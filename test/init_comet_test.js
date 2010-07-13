@@ -5,34 +5,48 @@ var vows = require('vows'),
 require.paths.push("lib");
 var init_comet = require('init_comet').app;
 
-var api = {
-  fab: {
-    when_upstream_replies_with: function(upstream_obj) {
-      return function () {
-        var topic = this;
+function when_upstream_replies_with(upstream_obj) {
+  return function () {
+    var topic = this;
 
-        var upstream = function() { this(upstream_obj); },
-            unary    = init_comet(upstream);
+    var upstream = function() { this(upstream_obj); },
+        unary = init_comet(upstream);
 
-        var chunks = [];
-        unary.call(
-          function listener(obj) {
-            chunks.push(obj);
-            if (obj == upstream_obj || typeof(obj) == "undefined") {
-              topic.callback(null, chunks);
-            }
-            return listener;
-          }
-        );
-      };
-    }
-  }
-};
+    var chunks = [];
+    unary.call(
+      function listener(obj) {
+        chunks.push(obj);
+        if (obj == upstream_obj || typeof(obj) == "undefined") {
+          topic.callback(null, chunks);
+        }
+        return listener;
+      }
+    );
+  };
+}
+
+function when_upstream_terminates() {
+  return function () {
+    var topic = this;
+
+    var upstream = function() { this(); },
+        unary = init_comet(upstream);
+
+    var chunks = [];
+    unary.call(
+      function listener(obj) {
+        chunks.push(obj);
+        return listener;
+      }
+    );
+    return chunks;
+  };
+}
 
 var suite = vows.describe('init_comet').
   addBatch({
     'with a player': {
-      topic: api.fab.when_upstream_replies_with({body: {id:1, uniq_id:42}}),
+      topic: when_upstream_replies_with({body: {id:1, uniq_id:42}}),
 
       'sets a session cookie': function(chunks) {
         assert.equal(chunks[0].headers["Set-Cookie"], "MYFABID=42");
@@ -62,19 +76,19 @@ var suite = vows.describe('init_comet').
       }
     },
 
-    'without a player': {
-      topic: api.fab.when_upstream_replies_with(),
+    'downstream is done sending/listening': {
+      topic: when_upstream_terminates(),
 
       'terminates the downstream connection': function(chunks) {
-        assert.isUndefined(chunks[0]);
+        assert.equal(chunks.length, 0);
       }
     },
 
     'with an invalid player object': {
-      topic: api.fab.when_upstream_replies_with({body:{}}),
+      topic: when_upstream_replies_with({status:404, body:"foo"}),
 
-      'terminates the downstream connection': function(chunks) {
-        assert.isUndefined(chunks[0]);
+      'passes thru the error': function(chunks) {
+        assert.equal(chunks[0].status, 404);
       }
     }
   }).export(module);
