@@ -7,11 +7,20 @@ var player_from_querystring = require('player_from_querystring').app;
 
 var api = {
   fab: {
-    send_obj: function(obj) {
+    body_response_to: function(obj) {
       return function () {
         var topic = this;
         var upstream_listener = player_from_querystring.call(
           function(obj) { topic.callback(null, obj && obj.body); }
+        );
+        upstream_listener(obj);
+      };
+    },
+    response_to: function(obj) {
+      return function () {
+        var topic = this;
+        var upstream_listener = player_from_querystring.call(
+          function(obj) { topic.callback(null, obj); }
         );
         upstream_listener(obj);
       };
@@ -22,7 +31,7 @@ var api = {
 var suite = vows.describe('player_from_querystring').
   addBatch({
     'with a query string': {
-      topic: api.fab.send_obj({
+      topic: api.fab.body_response_to({
         url: { search : "?player=foo&x=1&y=2" },
         headers: { cookie: null }
       }),
@@ -44,7 +53,7 @@ var suite = vows.describe('player_from_querystring').
       }
     },
     'without explicit X-Y coordinates': {
-      topic: api.fab.send_obj({
+      topic: api.fab.body_response_to({
         url: { search : "?player=foo" },
         headers: { cookie: null }
       }),
@@ -58,10 +67,19 @@ var suite = vows.describe('player_from_querystring').
       }
     },
     'POSTing data': {
-      topic: api.fab.send_obj({body: "foo"}),
+      topic: api.fab.response_to({body: "foo"}),
 
-      'is null response': function (obj) {
-        assert.isUndefined (obj);
+      'should raise an error': function (obj) {
+        assert.equal(obj.status, 406);
+      }
+    },
+    'invalid querystring': {
+      topic: api.fab.response_to({
+        url: { search : "?foo=bar" },
+        headers: { cookie: null }
+      }),
+      'should raise an error': function (obj) {
+        assert.equal(obj.status, 406);
       }
     }
   }).export(module);
