@@ -65,10 +65,11 @@ Player.prototype.notify = function(evt) {
 
 
 Player.prototype.stop = function () {
-  this.avatar.stop();
+  //TODO -- re-enable
+  //this.avatar.stop();
 
-  this.x = this.avatar.attrs.cx;
-  this.y = this.avatar.attrs.cy;
+  this.x = this.avatar.getBBox().x;
+  this.y = this.avatar.getBBox().y;
 };
 
 Player.prototype._bounce_away = function(from_x, from_y) {
@@ -95,9 +96,6 @@ Player.prototype.bounce_to = function(x, y) {
 Player.prototype.walk_to = function(x, y) {
   this.stop();
 
-  var p = "M" + Math.floor(this.x) + " " + Math.floor(this.y) +
-         " L" +                 x  + " " +                 y;
-
   var x_diff = x - this.x;
   var y_diff = y - this.y;
   var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
@@ -105,10 +103,8 @@ Player.prototype.walk_to = function(x, y) {
 
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
 
-  var self = this;
-  this.avatar.animateAlong(p, time, function(){
-    self.initial_walk = false;
-  });
+  // TODO self.initial_walk = false after walk has started
+  this.avatar.translate(x, y, time);
 
   this.x = x;
   this.y = y;
