@@ -6,9 +6,9 @@ Raphael.fn.svg_frames = function() {
     interval: 333,
     paper: paper,
 
-    add: function() {
-      for (var i=0; i<arguments.length; i++) {
-        this.list.push(this.draw_object(arguments[i]));
+    add: function(frame_list) {
+      for (var i=0; i<frame_list.length; i++) {
+        this.list.push(this.draw_object(frame_list[i]));
       }
     },
 
@@ -50,14 +50,15 @@ Raphael.fn.svg_frames = function() {
     },
 
 
-    translate: function(x, y, seconds) {
+    translate: function(x, y, ms) {
       for (var i=0; i<this.list.length; i++) {
-        this.translate_object(this.list[i], x, y, seconds);
+        this.translate_object(this.list[i], x, y, ms);
       }
-      this.toggle_frames(seconds);
+      if (ms && ms > 50) this.toggle_frames(ms);
+      return this;
     },
 
-    toggle_frames: function(seconds, count) {
+    toggle_frames: function(ms, count) {
       var self = this;
       if (!count) count=1;
 
@@ -73,17 +74,16 @@ Raphael.fn.svg_frames = function() {
         }
       }
 
-
-      if (count < Math.floor(seconds / self.interval)) {
-        var fn = function(){self.toggle_frames(seconds, count+1);};
+      if (count < Math.floor(ms / self.interval)) {
+        var fn = function(){self.toggle_frames(ms, count+1);};
         setTimeout(fn, self.interval);
       }
     },
 
-    translate_object: function(frame, x, y, seconds) {
+    translate_object: function(frame, x, y, ms) {
       // offset between end coordinates and current location
-      var x_diff = x - frame[0].getBBox().x;
-      var y_diff = y - frame[0].getBBox().y;
+      var x_diff = x - frame[frame.length-1].getBBox().x;
+      var y_diff = y - frame[frame.length-1].getBBox().y;
 
       for (var i=0; i<frame.length; i++) {
         var obj = frame[i];
@@ -93,7 +93,10 @@ Raphael.fn.svg_frames = function() {
                " l " + x_diff          + " " + y_diff;
 
          // animate along that path
-         obj.animateAlong(p, seconds);
+        if (ms && ms > 50)
+          obj.animateAlong(p, ms);
+        else
+          obj.translate(x_diff, y_diff);
       };
     },
 
@@ -113,8 +116,11 @@ Raphael.fn.svg_frames = function() {
 
   };
 
-  // TODO: accept an array argurment
-  frames.add.apply(frames, arguments);
+  if (arguments.length > 1)
+    frames.add(arguments);
+  else
+    frames.add(arguments[0]);
+
   frames.show_frame(frames.list[0]);
 
   return frames;

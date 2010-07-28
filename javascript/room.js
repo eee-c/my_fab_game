@@ -96,7 +96,8 @@ Room.prototype.draw_player = function(player, color) {
   // set x-y position from player.x, player.y
   return this
     .paper
-    .svg_frames(frames[0], frames[1]);
+    .svg_frames(frames)
+    .translate(player.x, player.y);
 };
 
 Room.prototype.draw = function() {
