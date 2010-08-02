@@ -10,6 +10,8 @@ var Player = function(id, options) {
 
   this.animate_with = options.animate_with || function (avatar) { };
   this.initial_walk = true;
+
+  this.faye = new Faye.Client('/faye');
 };
 
 Player.radius = 10;
@@ -20,7 +22,7 @@ Player.time_to_max_walk = 5 * 1000;
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
-      this.notify_server('move', {id:this.id, x:evt.x, y:evt.y});
+      this.faye.publish("/move", {id:this.id, x:evt.x, y:evt.y});
       break;
     case "message":
       this.notify_server('chat', {id:this.id, say:evt.value});

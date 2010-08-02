@@ -9,6 +9,12 @@ var PlayerList = function(me, room, options) {
 
   if (!options) options = {};
   this.onComplete = options.onComplete || function() {};
+
+  var self = this;
+  var client = new Faye.Client('/faye');
+  client.subscribe('/move', function(message) {
+    self.walk_player(message);
+  });
 };
 
 PlayerList.prototype.walk_player = function(attrs) {

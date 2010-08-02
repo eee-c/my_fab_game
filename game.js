@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-var puts = require( "sys" ).puts,
+var faye = require("faye"),
+    puts = require( "sys" ).puts,
     player_from_querystring = require('./lib/player_from_querystring').app,
     init_comet = require('./lib/init_comet').app,
     if_body  = require('./lib/if_body').app;
@@ -11,7 +12,7 @@ with ( require( "fab" ) )
 
 ( fab )
 
-  ( listen, 0xFAB )
+  ( listen_with_faye, 0xFAB )
 
   ( /move/ )
     ( if_body(
@@ -210,3 +211,10 @@ function player_status () {
   out();
 }
 
+setTimeout(function(){
+  puts("listing to faye");
+  var client = new faye.Client('http://localhost:4011/faye');
+  client.subscribe("/move", function(message) {
+    update_player_status(message);
+  });
+}, 1000);
