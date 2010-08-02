@@ -16,7 +16,6 @@ var Player = function(id, options) {
 
   this.direction = { x: 1, y: 0 };
 
-  this.animate_with = options.animate_with || function (avatar) { };
   this.initial_walk = true;
 
   this.faye = new Faye.Client('/faye');
@@ -140,23 +139,18 @@ Player.prototype.attach_avatar = function(avatar) {
 
   var animation_count = 0;
   avatar.onAnimation(function(){
-    self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
-
-    if (++animation_count > 25) {
-      self.animate_with(this);
-      animation_count = 0;
-    }
+    self.label.attr({x: avatar.getCenter().x, y: avatar.getCenter().y + Player.shadow_distance});
 
     if (self.balloon) {
-      self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
+      self.balloon.attr({x: avatar.getBBox().x, y: avatar.getBBox().y - Player.shadow_distance});
     }
 
-    var c_x = avatar.attr("cx") +
+    var c_x = avatar.getCenter().x +
               $(self.avatar.paper.canvas).parent().offset().left -
               $(document).scrollLeft() +
               1.1 * self.direction.x * Player.radius;
 
-    var c_y = avatar.attr("cy") +
+    var c_y = avatar.getBBox().y +
               $(self.avatar.paper.canvas).parent().offset().top -
               $(document).scrollTop() +
               1.1 * self.direction.y * Player.radius;

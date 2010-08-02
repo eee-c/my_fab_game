@@ -104,9 +104,18 @@ Raphael.fn.svg_frames = function() {
       return this.list[0][this.list[0].length-1].getBBox();
     },
 
+    getCenter: function() {
+      var bounding_box = this.getBBox();
+      return {
+        x: Math.floor(bounding_box.width/2) + bounding_box.x,
+        y: Math.floor(bounding_box.height/2) + bounding_box.y
+      };
+    },
+
     attr: function() {
       // delegate to last object in first frame
       var obj = this.list[0][this.list[0].length-1];
+      console.debug(arguments);
       return obj.attr.apply(obj, arguments);
     },
 
