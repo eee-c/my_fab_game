@@ -11,10 +11,12 @@ var PlayerList = function(me, room, options) {
   this.onComplete = options.onComplete || function() {};
 
   var self = this;
-  var client = new Faye.Client('/faye');
-  client.subscribe('/move', function(message) {
+  this.faye = new Faye.Client('/faye');
+  this.faye.subscribe('/move', function(message) {
     self.walk_player(message);
   });
+
+  this.faye.publish('/players/create', me.attrs());
 };
 
 PlayerList.prototype.walk_player = function(attrs) {

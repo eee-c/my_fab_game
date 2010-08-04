@@ -218,4 +218,9 @@ setTimeout(function(){
   client.subscribe("/move", function(message) {
     update_player_status(message);
   });
+
+  client.subscribe("/players/create", function(player) {
+    puts("adding player:" + player.id);
+    add_player(player);
+  });
 }, 500);

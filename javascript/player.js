@@ -19,6 +19,10 @@ Player.shadow_distance = 20;
 Player.max_walk = Math.sqrt(500*500 + 500*500);
 Player.time_to_max_walk = 5 * 1000;
 
+Player.prototype.attrs = function() {
+  return { id: this.id, x: this.x, y: this.y };
+};
+
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
