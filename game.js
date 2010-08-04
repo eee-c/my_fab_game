@@ -211,10 +211,11 @@ function player_status () {
   out();
 }
 
+// Ensure that the faye server has fully established by waiting half a
+// second before subscribing to channels
 setTimeout(function(){
-  puts("listing to faye");
   var client = new faye.Client('http://localhost:4011/faye');
   client.subscribe("/move", function(message) {
     update_player_status(message);
   });
-}, 1000);
+}, 500);
