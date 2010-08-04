@@ -33,8 +33,6 @@ $(function() {
       window.location = window.location.protocol + '//' + window.location.host + window.location.pathname;
     };
     player_list = new PlayerList(me, room, {onComplete: goodbye});
-
-    $('#iframe')[0].src = '/comet_view?player=' + me.id + '&x=' + me.x + '&y=' + me.y;
   }
 });
   </script>
@@ -47,6 +45,5 @@ $(function() {
      <input type="submit" value="Play">
    </form>
    <div id="room-container"></div>
-   <iframe id="iframe"></iframe>
  </body>
 </html>
