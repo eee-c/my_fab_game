@@ -19,6 +19,19 @@ var PlayerList = function(me, room, options) {
   this.faye.publish('/players/create', me.attrs());
 };
 
+PlayerList.prototype.initialize_population = function() {
+  var self = this;
+  var subscription = this.faye.subscribe('/players/all', function(players) {
+    for (var i=0; i<players.length; i++) {
+      self.add_player(players[i]);
+    }
+  });
+
+  this.faye.publish('/players/query', 'all');
+
+  setTimeout(function() {subscription.cancel();}, 2000);
+};
+
 PlayerList.prototype.walk_player = function(attrs) {
   var player = this.get_player(attrs.id);
   if (player) {

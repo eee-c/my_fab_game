@@ -223,4 +223,12 @@ setTimeout(function(){
     puts("adding player:" + player.id);
     add_player(player);
   });
+
+  client.subscribe("/players/query", function(q) {
+    var ret = [];
+    for (var id in players) {
+      ret.push(players[id].status);
+    }
+    client.publish("/players/all", ret);
+  });
 }, 500);
