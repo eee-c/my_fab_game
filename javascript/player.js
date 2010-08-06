@@ -29,7 +29,7 @@ Player.prototype.notify = function(evt) {
       this.faye.publish("/move", {id:this.id, x:evt.x, y:evt.y});
       break;
     case "message":
-      this.notify_server('chat', {id:this.id, say:evt.value});
+      this.faye.publish("/chat", {id:this.id, say:evt.value});
       break;
     default:
       console.debug("[notify] type: " + evt.type + " value: " + evt.value);
@@ -46,7 +46,7 @@ Player.prototype.bounce_away = function() {
   var x = this.x - 2*Player.radius*this.direction.x,
       y = this.y - 2*Player.radius*this.direction.y;
 
-  this.notify_server('bounce', {id: this.id, x: x, y: y});
+  this.faye.publish('/bounce', {id: this.id, x: x, y: y});
   this.bounce_to(x, y);
 };
 
@@ -146,8 +146,4 @@ Player.prototype.attach_avatar = function(avatar) {
       self.bounce_away();
     }
   });
-};
-
-Player.prototype.notify_server = function(action, change) {
-  $.post("/" + action, JSON.stringify(change));
 };

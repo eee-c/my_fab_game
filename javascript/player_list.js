@@ -10,20 +10,39 @@ var PlayerList = function(me, room, options) {
   if (!options) options = {};
   this.onComplete = options.onComplete || function() {};
 
-  var self = this;
   this.faye = new Faye.Client('/faye');
-  this.faye.subscribe('/move', function(message) {
-    self.walk_player(message);
-  });
+
+  this.init_population();
+  this.init_subscriptions();
 
   this.faye.publish('/players/create', me.attrs());
 };
 
-PlayerList.prototype.initialize_population = function() {
+PlayerList.prototype.init_subscriptions = function() {
+  var self = this;
+
+  this.faye.subscribe('/move', function(message) {
+    self.walk_player(message);
+  });
+
+  this.faye.subscribe('/bounce', function(message) {
+    self.bounce_player(message);
+  });
+
+  this.faye.subscribe('/chat', function(message) {
+    self.player_say(message);
+  });
+
+  this.faye.subscribe('/players/create', function(message) {
+    if (message.id != self.me.id) self.new_player(message);
+  });
+};
+
+PlayerList.prototype.init_population = function() {
   var self = this;
   var subscription = this.faye.subscribe('/players/all', function(players) {
     for (var i=0; i<players.length; i++) {
-      self.add_player(players[i]);
+      self.new_player(players[i]);
     }
   });
 

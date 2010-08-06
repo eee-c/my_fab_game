@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
 var faye = require("faye"),
-    puts = require( "sys" ).puts,
-    player_from_querystring = require('./lib/player_from_querystring').app,
-    init_comet = require('./lib/init_comet').app,
-    if_body  = require('./lib/if_body').app;
+    puts = require( "sys" ).puts;
 
 var players = {};
 
@@ -13,34 +10,6 @@ with ( require( "fab" ) )
 ( fab )
 
   ( listen_with_faye, 0xFAB )
-
-  ( /move/ )
-    ( if_body(
-        function () {
-          update_player_status(JSON.parse(""+this));
-          broadcast(comet_walk_player(this));
-        } ) )
-
-  ( /chat/ )
-    ( if_body(
-        function () {
-          var msg = JSON.parse(this.toString());
-          msg.body = msg.say.substr(0,100);
-          broadcast(comet_player_say(JSON.stringify(msg)));
-        } ) )
-
-  ( /bounce/ )
-     ( if_body(
-         function () {
-           update_player_status(JSON.parse(""+this));
-           broadcast(comet_bounce_player(this));
-         } ) )
-
-  ( /^\/comet_view/ )
-    ( broadcast_new )
-    ( store_player )
-    ( init_comet )
-    ( player_from_querystring )
 
   ( /^\/status/ )
     ( player_status )
@@ -61,16 +30,6 @@ with ( require( "fab" ) )
   ( 404 );
 
 
-function broadcast(comet_command) {
-  var num = 0;
-  for (var id in players) {
-    var player = players[id];
-    player.listener({body: comet_command});
-    num++;
-  }
-  puts("broadcasting to "+num+" players: " + comet_command);
-}
-
 function update_player_status(status) {
   if (players[status.id]) {
     puts("[update_player_status] " + status.id);
@@ -82,90 +41,12 @@ function update_player_status(status) {
   }
 }
 
-function comet_wrap(js) {
-  return '<script type="text/javascript">' +
-         'window.parent.' +
-         js +
-         '</script>' + "\n";
-}
-
-function comet_new_player(player_string) {
-  return comet_wrap('player_list.new_player('+ player_string +')');
-}
-
-function comet_walk_player(player_string) {
-  return comet_wrap('player_list.walk_player('+ player_string +')');
-}
-
-function comet_bounce_player(player_string) {
-  return comet_wrap('player_list.bounce_player('+ player_string +')');
-}
-
-function comet_player_say(player_string) {
-  return comet_wrap('player_list.player_say('+ player_string +')');
-}
-
-function comet_quit_player(id) {
-  return comet_wrap('player_list.remove_player("'+ id +'")');
-}
-
-function broadcast_new (app) {
-  return function () {
-    var out = this;
-
-    return app.call( function listener(obj) {
-      if (obj && obj.body && obj.body.id) {
-        for (var id in players) {
-          out({body: comet_new_player(JSON.stringify(players[id].status))});
-        }
-      }
-      else {
-        out(obj);
-      }
-      return listener;
-    });
-  };
-}
-
-function store_player (app) {
-  return function () {
-    var out = this;
-
-    return app.call( function listener(obj) {
-      if (obj && obj.body && obj.body.id) {
-        var new_id = obj.body.id;
-        if (!players[new_id]) {
-          puts("[store_player] adding: " + new_id);
-          add_player(obj.body, out);
-
-          idle_watch(new_id);
-          setTimeout(function(){keepalive(new_id);}, 30*1000);
-        }
-        else if (players[new_id].uniq_id == obj.body.uniq_id) {
-          puts("[store_player] refreshing session: " + new_id);
-          add_player(obj.body, out);
-        }
-        else {
-          out();
-        }
-      }
-      out(obj);
-
-      return listener;
-    });
-  };
-}
-
-function add_player(player, comet_stream) {
+function add_player(player) {
   var new_id = player.id;
   players[new_id] = {
     status: player,
-    listener: comet_stream,
     uniq_id: player.uniq_id
   };
-
-  puts("[add_player] broadcasting about: " + new_id);
-  broadcast(comet_new_player(JSON.stringify(player)));
 }
 
 
@@ -184,15 +65,8 @@ function idle_watch(id) {
 
 function drop_player(id) {
   puts("Dropping player \""+ id +"\"");
-  broadcast(comet_quit_player(id));
+  // TODO need to faye drop
   delete players[id];
-}
-
-function keepalive(id) {
-  if (players[id]) {
-    players[id].listener({body: '<script type="text/javascript">"12345789 "</script>' + "\n"});
-    setTimeout(function(){keepalive(id);}, 30*1000);
-  }
 }
 
 function player_status () {
