@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-var faye = require("faye"),
-    puts = require( "sys" ).puts;
-
-var players = {};
+var puts = require( "sys" ).puts;
 
 with ( require( "fab" ) )
 
@@ -34,48 +31,9 @@ with ( require( "fab" ) )
   ( 404 );
 
 
-function add_player(player) {
-  var new_id = player.id;
-  players[new_id] = {
-    status: player,
-    uniq_id: player.uniq_id
-  };
-  idle_watch(new_id);
-}
-
-function update_player_status(status) {
-  if (players[status.id]) {
-    puts("[update_player_status] " + status.id);
-    players[status.id].status = status;
-    idle_watch(status.id);
-  }
-  else {
-    puts("[update_player_status] unknown player: " + status.id + "!");
-  }
-}
-
-function idle_watch(id) {
-  if (players[id].idle_timeout) {
-    clearTimeout(players[id].idle_timeout);
-  }
-
-  players[id].idle_timeout = setTimeout(function() {
-    puts("timeout " + id +"!");
-    drop_player(id);
-  }, 30*60*1000);
-
-  players[id].idle_watch_started = "" + (new Date());
-}
-
-function drop_player(id) {
-  puts("Dropping player \""+ id +"\"");
-
-  delete players[id];
-}
-
 function player_status () {
   var out = this;
-  for (var id in players) {
+  for (var id in players.all()) {
     out = out({body: id})
              ({body: "\n"})
              ({body: "  timeout?:" + players[id].idle_timeout})
@@ -89,25 +47,81 @@ function player_status () {
   out();
 }
 
+// Player local store
+var players = ({
+  _: { },
 
-// Ensure that the faye server has fully established by waiting
-// half a second before subscribing to channels
-setTimeout(function(){
-  var client = new faye.Client('http://localhost:4011/faye');
-  client.subscribe("/move", function(message) {
-    update_player_status(message);
-  });
+  all: function() {
+    return this._;
+  },
 
-  client.subscribe("/players/create", function(player) {
-    puts("adding player:" + player.id);
-    add_player(player);
-  });
+  add_player: function(player) {
+    var new_id = player.id;
+    this._[new_id] = {
+      status: player,
+      uniq_id: player.uniq_id
+    };
+    this.idle_watch(new_id);
+  },
 
-  client.subscribe("/players/query", function(q) {
-    var ret = [];
-    for (var id in players) {
-      ret.push(players[id].status);
+  update_player_status: function(status) {
+    if (this._[status.id]) {
+      puts("[update_player_status] " + status.id);
+      this._[status.id].status = status;
+      this.idle_watch(status.id);
     }
-    client.publish("/players/all", ret);
-  });
-}, 500);
+    else {
+      puts("[update_player_status] unknown player: " + status.id + "!");
+    }
+  },
+
+  idle_watch: function(id) {
+    if (this._[id].idle_timeout) {
+      clearTimeout(this._[id].idle_timeout);
+    }
+
+    var self = this;
+    this._[id].idle_timeout = setTimeout(function() {
+      puts("timeout " + id +"!");
+      self.drop_player(id);
+    }, 30*60*1000);
+
+    this._[id].idle_watch_started = "" + (new Date());
+  },
+
+  drop_player: function(id) {
+    puts("Dropping player \""+ id +"\"");
+    this.faye.publish("/players/drop", id);
+    delete this._[id];
+  },
+
+  init_subscriptions: function() {
+    var faye = require("faye");
+    this.faye = new faye.Client('http://localhost:4011/faye');
+
+    this.faye.subscribe("/move", function(message) {
+      self.update_player_status(message);
+    });
+
+    this.faye.subscribe("/players/create", function(player) {
+      puts("adding player:" + player.id);
+      self.add_player(player);
+    });
+
+    this.faye.subscribe("/players/query", function(q) {
+      var ret = [];
+      for (var id in players) {
+        ret.push(players[id].status);
+      }
+      self.faye.publish("/players/all", ret);
+    });
+  },
+
+  init: function() {
+    var self = this;
+    // Ensure that the faye server has fully established by waiting
+    // half a second before subscribing to channels
+    setTimeout(function(){self.init_subscriptions();}, 500);
+    return self;
+  }
+}).init();
