@@ -33,7 +33,7 @@ PlayerList.prototype.init_subscriptions = function() {
     self.player_say(message);
   });
 
-  this.faye.subsribe('/quit', function(message) {
+  this.faye.subscribe('/quit', function(message) {
     self.player_quit(message);
   });
 
