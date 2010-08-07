@@ -33,6 +33,10 @@ PlayerList.prototype.init_subscriptions = function() {
     self.player_say(message);
   });
 
+  this.faye.subsribe('/quit', function(message) {
+    self.player_quit(message);
+  });
+
   this.faye.subscribe('/players/create', function(message) {
     if (message.id != self.me.id) self.new_player(message);
   });
@@ -84,7 +88,7 @@ PlayerList.prototype.add_player = function(player, color) {
 };
 
 PlayerList.prototype.remove_player = function(id) {
-  if (this.me.id == id) {
+  if (id == this.me.id) {
     // I am leaving and so is everyone else (as far as I'm concerned)
     for (var pid in this.players) {
       this.players[pid].quit();

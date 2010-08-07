@@ -9,11 +9,14 @@ with ( require( "fab" ) )
 
 ( fab )
 
+  // Listen on the FAB port and establish the faye server
   ( listen_with_faye, 0xFAB )
 
+  // resource to query player status -- debugging
   ( /^\/status/ )
     ( player_status )
 
+  // serve javascript and CSS
   (/^\/(javascript|stylesheets)/)
     (/^\/([-_\w]+)\.(js|css)$/)
       (fab.nodejs.fs)
@@ -21,14 +24,24 @@ with ( require( "fab" ) )
         ( fab.capture )
     (404)
 
+  // serve static HTML
   (/^\/([_\w]+)$/)
     (fab.nodejs.fs)
       ( fab.tmpl, "html/<%= this %>.html" )
       ( fab.capture.at, 0 )
 
-
+  // anything else is 404 / Not Found
   ( 404 );
 
+
+function add_player(player) {
+  var new_id = player.id;
+  players[new_id] = {
+    status: player,
+    uniq_id: player.uniq_id
+  };
+  idle_watch(new_id);
+}
 
 function update_player_status(status) {
   if (players[status.id]) {
@@ -40,15 +53,6 @@ function update_player_status(status) {
     puts("[update_player_status] unknown player: " + status.id + "!");
   }
 }
-
-function add_player(player) {
-  var new_id = player.id;
-  players[new_id] = {
-    status: player,
-    uniq_id: player.uniq_id
-  };
-}
-
 
 function idle_watch(id) {
   if (players[id].idle_timeout) {
@@ -65,7 +69,7 @@ function idle_watch(id) {
 
 function drop_player(id) {
   puts("Dropping player \""+ id +"\"");
-  // TODO need to faye drop
+
   delete players[id];
 }
 
@@ -85,8 +89,9 @@ function player_status () {
   out();
 }
 
-// Ensure that the faye server has fully established by waiting half a
-// second before subscribing to channels
+
+// Ensure that the faye server has fully established by waiting
+// half a second before subscribing to channels
 setTimeout(function(){
   var client = new faye.Client('http://localhost:4011/faye');
   client.subscribe("/move", function(message) {
