@@ -99,6 +99,7 @@ var players = ({
     var faye = require("faye");
     this.faye = new faye.Client('http://localhost:4011/faye');
 
+    var self = this;
     this.faye.subscribe("/move", function(message) {
       self.update_player_status(message);
     });
@@ -110,8 +111,8 @@ var players = ({
 
     this.faye.subscribe("/players/query", function(q) {
       var ret = [];
-      for (var id in players) {
-        ret.push(players[id].status);
+      for (var id in self._) {
+        ret.push(self._[id].status);
       }
       self.faye.publish("/players/all", ret);
     });
