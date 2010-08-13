@@ -26,10 +26,10 @@ Player.prototype.attrs = function() {
 Player.prototype.notify = function(evt) {
   switch(evt.type) {
     case "click":
-      this.faye.publish("/move", {id:this.id, x:evt.x, y:evt.y});
+      this.faye.publish("/players/move", {id:this.id, x:evt.x, y:evt.y});
       break;
     case "message":
-      this.faye.publish("/chat", {id:this.id, say:evt.value});
+      this.faye.publish("/players/chat", {id:this.id, say:evt.value});
       break;
     default:
       console.debug("[notify] type: " + evt.type + " value: " + evt.value);
@@ -46,7 +46,7 @@ Player.prototype.bounce_away = function() {
   var x = this.x - 2*Player.radius*this.direction.x,
       y = this.y - 2*Player.radius*this.direction.y;
 
-  this.faye.publish('/bounce', {id: this.id, x: x, y: y});
+  this.faye.publish('/players/bounce', {id: this.id, x: x, y: y});
   this.bounce_to(x, y);
 };
 

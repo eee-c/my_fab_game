@@ -100,7 +100,7 @@ var players = ({
     this.faye = new faye.Client('http://localhost:4011/faye');
 
     var self = this;
-    this.faye.subscribe("/move", function(message) {
+    this.faye.subscribe("/players/move", function(message) {
       self.update_player_status(message);
     });
 

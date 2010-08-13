@@ -21,20 +21,20 @@ var PlayerList = function(me, room, options) {
 PlayerList.prototype.init_subscriptions = function() {
   var self = this;
 
-  this.faye.subscribe('/move', function(message) {
+  this.faye.subscribe('/players/move', function(message) {
     self.walk_player(message);
   });
 
-  this.faye.subscribe('/bounce', function(message) {
+  this.faye.subscribe('/players/bounce', function(message) {
     self.bounce_player(message);
   });
 
-  this.faye.subscribe('/chat', function(message) {
+  this.faye.subscribe('/players/chat', function(message) {
     self.player_say(message);
   });
 
-  this.faye.subscribe('/quit', function(message) {
-    self.player_quit(message);
+  this.faye.subscribe('/players/drop', function(message) {
+    self.remove_player(message);
   });
 
   this.faye.subscribe('/players/create', function(message) {
