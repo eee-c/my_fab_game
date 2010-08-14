@@ -34,14 +34,15 @@ with ( require( "fab" ) )
 function player_status () {
   var out = this;
   for (var id in players.all()) {
+    var player = players.get(id);
     out = out({body: id})
              ({body: "\n"})
-             ({body: "  timeout?:" + players[id].idle_timeout})
+             ({body: "  timeout?:" + player.idle_timeout})
              ({body: "\n"})
-             ({body: "  idle from:" + players[id].idle_watch_started})
+             ({body: "  idle from:" + player.idle_watch_started})
              ({body: "\n"})
-             ({body: "  x " + players[id].status.x})
-             ({body:  " y " + players[id].status.y})
+             ({body: "  x " + player.status.x})
+             ({body:  " y " + player.status.y})
              ({body: "\n"});
   }
   out();
@@ -53,6 +54,10 @@ var players = ({
 
   all: function() {
     return this._;
+  },
+
+  get: function(id) {
+    return this._[id];
   },
 
   add_player: function(player) {
