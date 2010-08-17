@@ -65,7 +65,6 @@ PlayerList.prototype.walk_player = function(attrs) {
 PlayerList.prototype.bounce_player = function(attrs) {
   var player = this.get_player(attrs.id);
   if (player) {
-    player.stop();
     player.bounce_to(attrs.x, attrs.y);
   }
 };

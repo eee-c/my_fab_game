@@ -14,10 +14,10 @@ var Player = function(id, options) {
   this.faye = new Faye.Client('/faye');
 };
 
-Player.radius = 10;
-Player.shadow_distance = 20;
+Player.radius = 20;
+Player.shadow_distance = Player.radius + 10;
 Player.max_walk = Math.sqrt(500*500 + 500*500);
-Player.time_to_max_walk = 5 * 1000;
+Player.time_to_max_walk = 10 * 1000;
 
 Player.prototype.attrs = function() {
   return { id: this.id, x: this.x, y: this.y };
@@ -35,6 +35,8 @@ Player.prototype.notify = function(evt) {
       console.debug("[notify] type: " + evt.type + " value: " + evt.value);
   }
 };
+
+
 Player.prototype.stop = function () {
   this.avatar.stop();
 
@@ -42,20 +44,20 @@ Player.prototype.stop = function () {
   this.y = this.avatar.attrs.cy;
 };
 
-Player.prototype.bounce_away = function() {
-  var x = this.x - 2*Player.radius*this.direction.x,
-      y = this.y - 2*Player.radius*this.direction.y;
+Player.prototype._bounce_away = function(from_x, from_y) {
+  this.mid_bounce = true;
+
+  var x = from_x - Player.radius*this.direction.x,
+      y = from_y - Player.radius*this.direction.y;
 
   this.faye.publish('/players/bounce', {id: this.id, x: x, y: y});
-  this.bounce_to(x, y);
 };
 
 Player.prototype.bounce_to = function(x, y) {
-  this.mid_bounce = true;
+  this.stop();
 
   var self = this;
-  this.avatar.animate({cx: x, cy: y}, 500, "bounce",
-                      function(){self.mid_bounce = false;});
+  this.avatar.animate({cx: x, cy: y}, 500, "bounce");
   setTimeout(function(){ self.mid_bounce = false; }, 1000);
 
   this.x = x;
@@ -126,11 +128,13 @@ Player.prototype.attach_avatar = function(avatar) {
 
     var c_x = avatar.attr("cx") +
               $(self.avatar.paper.canvas).parent().offset().left -
-              $(document).scrollLeft();
+              $(document).scrollLeft() +
+              self.direction.x * Player.radius;
 
     var c_y = avatar.attr("cy") +
               $(self.avatar.paper.canvas).parent().offset().top -
-              $(document).scrollTop();
+              $(document).scrollTop() +
+              self.direction.y * Player.radius;
 
     var c_el = document.elementFromPoint(c_x, c_y);
 
@@ -142,8 +146,7 @@ Player.prototype.attach_avatar = function(avatar) {
       // console.debug(c_el);
       // console.debug("Me:");
       // console.debug(self.avatar);
-      self.stop();
-      self.bounce_away();
+      self._bounce_away(c_x, c_y);
     }
   });
 };
