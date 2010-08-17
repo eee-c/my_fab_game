@@ -14,10 +14,10 @@ var Player = function(id, options) {
   this.faye = new Faye.Client('/faye');
 };
 
-Player.radius = 20;
+Player.radius = 15;
 Player.shadow_distance = Player.radius + 10;
 Player.max_walk = Math.sqrt(500*500 + 500*500);
-Player.time_to_max_walk = 10 * 1000;
+Player.time_to_max_walk = 8 * 1000;
 
 Player.prototype.attrs = function() {
   return { id: this.id, x: this.x, y: this.y };
@@ -47,8 +47,8 @@ Player.prototype.stop = function () {
 Player.prototype._bounce_away = function(from_x, from_y) {
   this.mid_bounce = true;
 
-  var x = from_x - Player.radius*this.direction.x,
-      y = from_y - Player.radius*this.direction.y;
+  var x = from_x - 1.5*Player.radius*this.direction.x,
+      y = from_y - 1.5*Player.radius*this.direction.y;
 
   this.faye.publish('/players/bounce', {id: this.id, x: x, y: y});
 };
@@ -113,6 +113,8 @@ Player.prototype.attach_avatar = function(avatar) {
     .text(this.x, this.y + Player.shadow_distance, this.id)
     .attr({"font-size": 12});
 
+  avatar.node.is_player_circle = true;
+
   var animation_count = 0;
   avatar.onAnimation(function(){
     self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
@@ -129,19 +131,20 @@ Player.prototype.attach_avatar = function(avatar) {
     var c_x = avatar.attr("cx") +
               $(self.avatar.paper.canvas).parent().offset().left -
               $(document).scrollLeft() +
-              self.direction.x * Player.radius;
+              1.1 * self.direction.x * Player.radius;
 
     var c_y = avatar.attr("cy") +
               $(self.avatar.paper.canvas).parent().offset().top -
               $(document).scrollTop() +
-              self.direction.y * Player.radius;
+              1.1 * self.direction.y * Player.radius;
 
     var c_el = document.elementFromPoint(c_x, c_y);
 
     if (!self.initial_walk &&
         !self.mid_bounce &&
-        c_el != self.avatar.node &&
-        c_el != self.avatar.paper.bottom.node) {
+        c_el.is_player_circle &&
+        c_el != self.avatar.node) {
+      // console.debug(self.direction);
       // console.debug("Colliding element:");
       // console.debug(c_el);
       // console.debug("Me:");
