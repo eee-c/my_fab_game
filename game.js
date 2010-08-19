@@ -62,11 +62,9 @@ var players = ({
 
   add_player: function(player) {
     var new_id = player.id;
-    this._[new_id] = {
-      status: player,
-      uniq_id: player.uniq_id
-    };
-    this.idle_watch(new_id);
+    if (!this._[new_id])
+      this._[new_id] = {};
+    this.update_player_status(player);
   },
 
   update_player_status: function(status) {
