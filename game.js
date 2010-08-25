@@ -2,12 +2,51 @@
 
 var puts = require( "sys" ).puts;
 
+var serverAuth = {
+  incoming: function(message, callback) {
+    // Let non-meta messages through
+    if (message.channel.indexOf('/meta/') === 0)
+      return callback(message);
+
+    puts(message.channel);
+
+    // Get subscribed channel and auth token
+    var subscription = message.subscription,
+        msgToken     = message.ext && message.ext.authToken;
+
+    // If the message has a player ID
+    if (message.data.id) {
+      puts("  checking for player: " + message.data.id);
+      puts(players);
+      puts(players.get(message.data.id));
+
+      // If the player is already in the room
+      if (players.get(message.data.id)) {
+        puts("[token check] " + players.get(message.data.id).token + " " + msgToken);
+
+        // If the tokens do not match, stop the message
+        if (players.get(message.data.id).token != msgToken) {
+          puts("rejecting mis-matched token message");
+          message.error = 'Invalid player auth token';
+        }
+      }
+      else {
+        puts(message.data.id + " adding message token: " + msgToken);
+        message.data.authToken = msgToken;
+      }
+    }
+
+    // Call the server back now we're done
+    return callback(message);
+  }
+};
+
 with ( require( "fab" ) )
 
 ( fab )
 
   // Listen on the FAB port and establish the faye server
-  ( listen_with_faye, 0xFAB )
+  ( listen_with_faye, { port: 0xFAB, extension: serverAuth } )
 
   // resource to query player status -- debugging
   ( /^\/status/ )
@@ -63,7 +102,9 @@ var players = ({
   add_player: function(player) {
     var new_id = player.id;
     if (!this._[new_id])
-      this._[new_id] = {};
+      this._[new_id] = {token: player.authToken};
+    delete(player['authToken']);
+
     this.update_player_status(player);
   },
 

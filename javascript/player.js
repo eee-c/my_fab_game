@@ -6,12 +6,39 @@ var Player = function(id, options) {
   this.x = options.x || 250;
   this.y = options.y || 250;
 
+  this.uniq_id = "" +
+    this.id +
+    "-" +
+    Math.floor(Math.random()*10) +
+    Math.floor(Math.random()*10) +
+    Math.floor(Math.random()*10) +
+    Math.floor(Math.random()*10);
+
   this.direction = { x: 1, y: 0 };
 
   this.animate_with = options.animate_with || function (avatar) { };
   this.initial_walk = true;
 
   this.faye = new Faye.Client('/faye');
+
+  var self = this;
+  var clientAuth = {
+    outgoing: function(message, callback) {
+      // Leave non-data messages alone
+      if (message.channel.indexOf('/meta/') === 0)
+        return callback(message);
+
+      // Add ext field if it's not present
+      if (!message.ext) message.ext = {};
+
+      // Set the auth token
+      message.ext.authToken = self.uniq_id;
+
+      // Carry on and send the message to the server
+      return callback(message);
+    }
+  };
+  this.faye.addExtension(clientAuth);
 };
 
 Player.radius = 15;
@@ -20,7 +47,7 @@ Player.max_walk = Math.sqrt(500*500 + 500*500);
 Player.time_to_max_walk = 8 * 1000;
 
 Player.prototype.attrs = function() {
-  return { id: this.id, x: this.x, y: this.y };
+  return { id: this.id, x: this.x, y: this.y, _id: this.uniq_id };
 };
 
 Player.prototype.notify = function(evt) {

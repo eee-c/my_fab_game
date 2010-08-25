@@ -15,6 +15,25 @@ var PlayerList = function(me, room, options) {
   this.init_population();
   this.init_subscriptions();
 
+  var self = this;
+  var clientAuth = {
+    outgoing: function(message, callback) {
+      // Leave non-data messages alone
+      if (message.channel.indexOf('/meta/') === 0)
+        return callback(message);
+
+      // Add ext field if it's not present
+      if (!message.ext) message.ext = {};
+
+      // Set the auth token
+      message.ext.authToken = self.me.uniq_id;
+
+      // Carry on and send the message to the server
+      return callback(message);
+    }
+  };
+  this.faye.addExtension(clientAuth);
+
   this.faye.publish('/players/create', me.attrs());
 };
 
