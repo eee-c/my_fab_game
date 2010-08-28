@@ -207,6 +207,11 @@ var players = ({
     Logger.info("players.drop_player " + id);
     this.faye.publish("/players/drop", id);
     delete this._[id];
+
+    this._get(id, function(player) {
+      Logger.debug("[players.drop_player] " + inspect(player));
+      if (player) db.removeDoc(id, player._rev);
+    });
   },
 
   init_subscriptions: function() {
