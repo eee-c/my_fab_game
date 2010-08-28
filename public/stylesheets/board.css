@@ -1,0 +1,26 @@
+body {
+  background: #333;
+}
+label {
+  background-color: #eee;
+  padding: 4px 4px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border: 1px solid black;
+}
+#canvas {
+  border: 1px solid black;
+}
+#iframe {
+  display: none;
+}
+#chat {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  background-color: #fff;
+  border: 1px solid #999;
+}
+#chat label {
+  border: none;
+  background-color: #fff;
+}

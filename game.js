@@ -5,15 +5,11 @@ process.on('uncaughtException', function (err) {
   console.log('Caught uncaughtException: ' + err.stack);
 });
 
-var http = require('http'),
+var express = require('express'),
+    http = require('http'),
     faye = require('faye'),
     inspect = require( "sys" ).inspect,
-    fab     = require('fab');
-
-// Additional (fab) apps
-fab.static = require('fab.static');
-fab.accept = require('fab.accept');
-
+    puts = require( "sys" ).puts;
 
 // Player local store
 var players = (require("./lib/players")).init();
@@ -22,154 +18,68 @@ var Logger = require("./lib/logger");
 
 Logger.info("Starting up...");
 
+// Create the Express server
+var app = express.createServer();
 
-// Partials and in-page javascript
+// Serve statics from ./public
+app.use(express.staticProvider(__dirname + '/public'));
 
-var board_js_string =  "var player_list; \
-\
-$(function() { \
-  var kv = location.search.substr(1).split(/=/); \
-  if (kv[0] == 'player' && kv[1]) { \
-    $('#login').hide(); \
-\
-    var me = new Player(kv[1], {animate_with: function(avatar){ \
-      var color = ['#ccc', '#c00', '#0c0'][Math.floor(3*Math.random(3))]; \
-      avatar.attr({fill: color}); \
-    } }); \
-\
-    var room = new Room($('#room-container')[0]); \
-    var goodbye = function() { \
-      window.location = window.location.protocol + '//' + \
-        window.location.host + \
-        window.location.pathname + \
-        '?message=You have been logged out.'  ; \
-    }; \
-    player_list = new PlayerList(me, room, {onComplete: goodbye}); \
-  } \
-}); \
-";
+// Server-side extension to lock player messages to client that added
+// the player in the first place,
+// http://japhr.blogspot.com/2010/08/per-message-authorization-in-faye.html
+var serverAuth = {
+  incoming: function(message, callback) {
+    // Let non-meta messages through
+    if (message.channel.indexOf('/meta/') === 0)
+      return callback(message);
 
-with ( fab )
-with ( html ) head =
+    puts(message.channel);
 
-  ( fab )
-    ( HEAD )
-      ( TITLE )( "My (fab) Game" )()
-      ( LINK, { href:  "/stylesheets/board.css",
-                media: "screen",
-                rel:   "stylesheet",
-                type:  "text/css" } )
-      ( SCRIPT, { src:  "/javascript/jquery-min.js",
-                  type: "application/javascript" } )()
+    // Get subscribed channel and auth token
+    var subscription = message.subscription,
+        msgToken     = message.ext && message.ext.authToken;
 
-      ( SCRIPT, { src:  "/javascript/json2.js",
-                  type: "application/javascript" } )()
+    // If the message has a player ID
+    if (message.data.id) {
+      puts("  checking for player: " + message.data.id);
+      puts(players);
+      puts(players.get(message.data.id));
 
-      ( SCRIPT, { src: "/faye.js",
-                  type: "text/javascript" } )()
+      // If the player is already in the room
+      if (players.get(message.data.id)) {
+        puts("[token check] " + players.get(message.data.id).token + " " + msgToken);
 
-      ( SCRIPT, { src:  "/javascript/raphael-min.js",
-                  type: "application/javascript" } )()
-      ( SCRIPT, { src:  "/javascript/raphael-animate_frames.js",
-                  type: "application/javascript" } )()
-      ( SCRIPT, { src:  "/javascript/player.js",
-                  type: "application/javascript" } )()
-      ( SCRIPT, { src:  "/javascript/player_list.js",
-                  type: "application/javascript" } )()
-      ( SCRIPT, { src:  "/javascript/room.js",
-                  type: "application/javascript" } )()
+        // If the tokens do not match, stop the message
+        if (players.get(message.data.id).token != msgToken) {
+          puts("rejecting mis-matched token message");
+          message.error = 'Invalid player auth token';
+        }
+      }
+      else {
+        puts(message.data.id + " adding message token: " + msgToken);
+        message.data.authToken = msgToken;
+      }
+    }
 
-      ( SCRIPT, { src:  "/javascript/player_frames.js",
-                  type: "application/javascript" } )()
+    // Call the server back now we're done
+    return callback(message);
+  }
+};
 
-      ( SCRIPT, { type: "application/javascript" } )
-        ( board_js_string )
-      ()
+// Faye nodejs adapter
+var bayeux = new faye.NodeAdapter({
+  mount:    '/faye',
+  timeout:  45
+});
 
-    ()
-  ();
+// Add the server-side faye extension
+bayeux.addExtension(serverAuth);
 
+// Add the faye nodejs faye adapter to the nodejs server
+bayeux.attach(app);
 
-
-with ( fab )
-with ( html )
-
-( fab )
-
-  // Listen on the FAB port and establish the faye server
-  ( listen, 0xFAB, attach_faye )
-
-  (route, /javascript/)
-    (route, /\/([^\/]*)$/)
-      // Stream javascript files from ./javascript
-      (static, "javascript", "text/javascript", "js")
-    ()
-    ('Not found!')
-  ()
-
-  (route, /^\/stylesheets/)
-    (route, /^\/(.*)/)
-      // Stream stylesheets files from ./stylesheets
-      (static, "stylesheets", "text/css", "css")
-    ()
-    ('Not found!')
-  ()
-
-  ( route, /^\/status/ )
-    ( accept.HTML )
-      ( HTML )
-        ( head )
-        ( BODY )
-          ( PRE )
-            ( player_status )
-          ()
-        ()
-      ()
-    ()
-    ( accept.PLAIN )
-      (undefined, {headers: { "Content-Type": "text/plain"}})
-      ( player_status )
-    ()
-    ( "not found", { status: 404 } )
-  ()
-
-  (route, /^\/board/)
-    ( HTML )
-      ( head )
-      ( BODY )
-        ( info )
-        ( FORM, { id: "login", method: "get" } )
-          ( LABEL )
-            ( "Name" )
-            ( INPUT, { type: "text", name: "player" } )
-          ()
-          ( INPUT, { type: "submit", value: "Play" } )
-        ()
-        ( DIV, { id: "room-container" } )()
-      () // BODY
-
-    () // HTML
-  ()
-
-();
-
-
-// Local (fab) apps
-
-function player_status(write) {
-  return write(function(write) {
-    return fab.stream(function(stream) {
-      players.all(function(list) {
-        var ret = "";
-        list.forEach(function(player) {
-          ret += player.status.id + "\n";
-        });
-        stream(write(ret + "\n"));
-        stream(write());
-      });
-    });
-  });
-}
+// Listen on port 4011 (0xFAB)
+app.listen(4011);
 
 function info(write) {
   return write(function(write, head) {
