@@ -1,12 +1,25 @@
 #!/usr/bin/env node
 
 var express = require('express'),
-    http = require('http'),
-    faye = require('faye'),
-    puts = require( "sys" ).puts,
+    http    = require('http'),
+    faye    = require('faye'),
+    puts    = require( "sys" ).puts,
+    inspect = require( "sys" ).inspect,
     couchdb = require('node-couchdb/lib/couchdb'),
     client  = couchdb.createClient(5984, 'localhost'),
     db      = client.db('my-fab-game');
+
+Logger = {
+  level: 1,
+
+  debug:  function(msg) { if (this.level<1) puts("[DEBUG] " + msg); },
+  info:   function(msg) { if (this.level<2)  puts("[INFO] " + msg); },
+  warn:   function(msg) { if (this.level<3)  puts("[WARN] " + msg); },
+  errror: function(msg) { if (this.level<4)  puts("[ERROR] " + msg); }
+};
+
+
+Logger.info("Starting up...");
 
 // Create the Express server
 var app = express.createServer();
@@ -32,7 +45,7 @@ var serverAuth = {
     if (message.channel.indexOf('/meta/') === 0)
       return callback(message);
 
-    puts(message.channel);
+    Logger.debug("[Faye.incoming] " + message.channel);
 
     // Get subscribed channel and auth token
     var subscription = message.subscription,
@@ -40,22 +53,21 @@ var serverAuth = {
 
     // If the message has a player ID
     if (message.data.id) {
-      puts("  checking for player: " + message.data.id);
-      puts(players);
-      puts(players.get(message.data.id));
+      Logger.debug("[Faye.incoming]  checking for player: " + message.data.id);
+      Logger.debug("[Faye.incoming]  " + players.get(message.data.id));
 
       // If the player is already in the room
       if (players.get(message.data.id)) {
-        puts("[token check] " + players.get(message.data.id).token + " " + msgToken);
+        Logger.debug("[Faye.incoming]  token check: " + players.get(message.data.id).token + " " + msgToken);
 
         // If the tokens do not match, stop the message
         if (players.get(message.data.id).token != msgToken) {
-          puts("rejecting mis-matched token message");
+          Logger.warn("rejecting mis-matched token message");
           message.error = 'Invalid player auth token';
         }
       }
       else {
-        puts(message.data.id + " adding message token: " + msgToken);
+        Logger.debug("[Faye.incoming]  " + message.data.id + " adding message token: " + msgToken);
         message.data.authToken = msgToken;
       }
     }
@@ -135,28 +147,46 @@ var players = ({
     return this._;
   },
 
+  _get: function(id, callback) {
+    Logger.debug("[players.get] trying to get: " + id);
+    db.getDoc(id, function(err, res) {
+      if (err) {
+        Logger.warn(JSON.stringify(er));
+      }
+      callback(res);
+    });
+  },
+
   get: function(id) {
     return this._[id];
   },
 
   add_player: function(player) {
     var new_id = player.id;
-    if (!this.get(new_id))
+    Logger.info("[players.add_player] adding: " + new_id);
+    if (!this.get(new_id)) {
       this._[new_id] = {token: player.authToken};
+      db.saveDoc(new_id, this._[new_id]);
+    }
     delete(player['authToken']);
 
     this.update_player_status(player);
   },
 
   update_player_status: function(status) {
-    if (this.get(status.id)) {
-      puts("[update_player_status] " + status.id);
-      this.get(status.id).status = status;
-      this.idle_watch(status.id);
-    }
-    else {
-      puts("[update_player_status] unknown player: " + status.id + "!");
-    }
+    var self = this;
+    this._get(status.id, function(player) {
+      Logger.debug("[players.update_player_status] " + inspect(player));
+      if (player) {
+        Logger.info("[players.update_player_status] updating: " + status.id);
+        player.status = status;
+        db.saveDoc(player);
+        self.idle_watch(status.id);
+      }
+      else {
+        Logger.warn("[players.update_player_status] unknown player: " + status.id + "!");
+      }
+    });
   },
 
   idle_watch: function(id) {
@@ -166,7 +196,7 @@ var players = ({
 
     var self = this;
     this.get(id).idle_timeout = setTimeout(function() {
-      puts("timeout " + id +"!");
+      Logger.info("timeout " + id +"!");
       self.drop_player(id);
     }, 30*60*1000);
 
@@ -174,7 +204,7 @@ var players = ({
   },
 
   drop_player: function(id) {
-    puts("Dropping player \""+ id +"\"");
+    Logger.info("[players.drop_player] dropping " + id);
     this.faye.publish("/players/drop", id);
     delete this.get(id);
   },
@@ -185,11 +215,12 @@ var players = ({
 
     var self = this;
     this.faye.subscribe("/players/move", function(message) {
+      Logger.debug("[/players/move] " + inspect(message));
       self.update_player_status(message);
     });
 
     this.faye.subscribe("/players/create", function(player) {
-      puts("adding player:" + player.id);
+      Logger.debug("[/players/create] " + inspect(player));
       self.add_player(player);
     });
 
