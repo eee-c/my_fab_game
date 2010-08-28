@@ -1,7 +1,19 @@
 #!/usr/bin/env node
 
-var puts = require( "sys" ).puts;
+var express = require('express'),
+    http = require('http'),
+    faye = require('faye'),
+    puts = require( "sys" ).puts;
 
+// Create the Express server
+var app = express.createServer();
+
+// Serve statics from ./public
+app.use(express.staticProvider(__dirname + '/public'));
+
+// Server-side extension to lock player messages to client that added
+// the player in the first place,
+// http://japhr.blogspot.com/2010/08/per-message-authorization-in-faye.html
 var serverAuth = {
   incoming: function(message, callback) {
     // Let non-meta messages through
@@ -41,33 +53,49 @@ var serverAuth = {
   }
 };
 
-with ( require( "fab" ) )
+// Faye nodejs adapter
+var bayeux = new faye.NodeAdapter({
+  mount:    '/faye',
+  timeout:  45
+});
 
-( fab )
+// Add the server-side faye extension
+bayeux.addExtension(serverAuth);
 
-  // Listen on the FAB port and establish the faye server
-  ( listen_with_faye, { port: 0xFAB, extension: serverAuth } )
+// Add the faye nodejs faye adapter to the nodejs server
+bayeux.attach(app);
 
-  // resource to query player status -- debugging
-  ( /^\/status/ )
-    ( player_status )
+// Listen on port 4011 (0xFAB)
+app.listen(4011);
 
-  // serve javascript and CSS
-  (/^\/(javascript|stylesheets)/)
-    (/^\/([-_\w]+)\.(js|css)$/)
-      (fab.nodejs.fs)
-        ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
-        ( fab.capture )
-    (404)
 
-  // serve static HTML
-  (/^\/([_\w]+)$/)
-    (fab.nodejs.fs)
-      ( fab.tmpl, "html/<%= this %>.html" )
-      ( fab.capture.at, 0 )
+// with ( require( "fab" ) )
 
-  // anything else is 404 / Not Found
-  ( 404 );
+// ( fab )
+
+//   // Listen on the FAB port and establish the faye server
+//   ( listen_with_faye, { port: 0xFAB, extension: serverAuth } )
+
+//   // resource to query player status -- debugging
+//   ( /^\/status/ )
+//     ( player_status )
+
+//   // serve javascript and CSS
+//   (/^\/(javascript|stylesheets)/)
+//     (/^\/([-_\w]+)\.(js|css)$/)
+//       (fab.nodejs.fs)
+//         ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
+//         ( fab.capture )
+//     (404)
+
+//   // serve static HTML
+//   (/^\/([_\w]+)$/)
+//     (fab.nodejs.fs)
+//       ( fab.tmpl, "html/<%= this %>.html" )
+//       ( fab.capture.at, 0 )
+
+//   // anything else is 404 / Not Found
+//   ( 404 );
 
 
 function player_status () {
