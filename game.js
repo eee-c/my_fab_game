@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
-var puts = require( "sys" ).puts;
+var http = require('http'),
+    faye = require('faye'),
+    puts = require( "sys" ).puts,
+    couchdb = require('node-couchdb/lib/couchdb'),
+    client  = couchdb.createClient(5984, 'localhost'),
+    db      = client.db('my-fab-game');
 
 var serverAuth = {
   incoming: function(message, callback) {
@@ -101,7 +106,7 @@ var players = ({
 
   add_player: function(player) {
     var new_id = player.id;
-    if (!this._[new_id])
+    if (!this.get(new_id))
       this._[new_id] = {token: player.authToken};
     delete(player['authToken']);
 
@@ -109,9 +114,9 @@ var players = ({
   },
 
   update_player_status: function(status) {
-    if (this._[status.id]) {
+    if (this.get(status.id)) {
       puts("[update_player_status] " + status.id);
-      this._[status.id].status = status;
+      this.get(status.id).status = status;
       this.idle_watch(status.id);
     }
     else {
@@ -120,23 +125,23 @@ var players = ({
   },
 
   idle_watch: function(id) {
-    if (this._[id].idle_timeout) {
-      clearTimeout(this._[id].idle_timeout);
+    if (this.get(id).idle_timeout) {
+      clearTimeout(this.get(id).idle_timeout);
     }
 
     var self = this;
-    this._[id].idle_timeout = setTimeout(function() {
+    this.get(id).idle_timeout = setTimeout(function() {
       puts("timeout " + id +"!");
       self.drop_player(id);
     }, 30*60*1000);
 
-    this._[id].idle_watch_started = "" + (new Date());
+    this.get(id).idle_watch_started = "" + (new Date());
   },
 
   drop_player: function(id) {
     puts("Dropping player \""+ id +"\"");
     this.faye.publish("/players/drop", id);
-    delete this._[id];
+    delete this.get(id);
   },
 
   init_subscriptions: function() {
