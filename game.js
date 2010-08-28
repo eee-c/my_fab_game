@@ -189,7 +189,7 @@ var players = ({
   drop_player: function(id) {
     Logger.info("players.drop_player " + id);
     this.faye.publish("/players/drop", id);
-    delete this.get(id);
+    delete this._[id];
   },
 
   init_subscriptions: function() {
