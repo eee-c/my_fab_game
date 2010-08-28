@@ -145,15 +145,17 @@ var players = ({
   },
 
   add_player: function(player) {
+    var self = this;
     var new_id = player.id;
     Logger.info("players.add_player: " + new_id);
-    if (!this.get(new_id)) {
-      this._[new_id] = {token: player.authToken};
-      db.saveDoc(new_id, this._[new_id]);
-    }
-    delete(player['authToken']);
+    this._get(new_id, function(old_player) {
+      if (!old_player) {
+        db.saveDoc(new_id, {token: player.authToken});
 
-    this.update_player_status(player);
+        delete(player['authToken']);
+        self.update_player_status(player);
+      }
+    });
   },
 
   update_player_status: function(status) {
