@@ -146,7 +146,7 @@ var players = ({
 
   add_player: function(player) {
     var new_id = player.id;
-    Logger.info("[players.add_player] adding: " + new_id);
+    Logger.info("players.add_player: " + new_id);
     if (!this.get(new_id)) {
       this._[new_id] = {token: player.authToken};
       db.saveDoc(new_id, this._[new_id]);
@@ -161,7 +161,7 @@ var players = ({
     this._get(status.id, function(player) {
       Logger.debug("[players.update_player_status] " + inspect(player));
       if (player) {
-        Logger.info("[players.update_player_status] updating: " + status.id);
+        Logger.info("players.update_player_status: " + status.id);
         player.status = status;
         db.saveDoc(player);
         self.idle_watch(status.id);
@@ -187,7 +187,7 @@ var players = ({
   },
 
   drop_player: function(id) {
-    Logger.info("[players.drop_player] dropping " + id);
+    Logger.info("players.drop_player " + id);
     this.faye.publish("/players/drop", id);
     delete this.get(id);
   },
