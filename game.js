@@ -180,8 +180,8 @@ var players = ({
       if (player) {
         Logger.info("players.update_player_status: " + status.id);
         player.status = status;
+        player.timeout = self.idle_watch(status.id);
         db.saveDoc(player);
-        self.idle_watch(status.id);
       }
       else {
         Logger.warn("[players.update_player_status] unknown player: " + status.id + "!");
@@ -189,18 +189,20 @@ var players = ({
     });
   },
 
+  timeout: 30*60*1000,
+  timeouts: { },
+
   idle_watch: function(id) {
-    if (this.get(id).idle_timeout) {
-      clearTimeout(this.get(id).idle_timeout);
-    }
+    if (this.timeouts[id])
+      clearTimeout(this.timeouts[id]);
 
     var self = this;
-    this.get(id).idle_timeout = setTimeout(function() {
+    this.timeouts[id] = setTimeout(function() {
       Logger.info("timeout " + id +"!");
       self.drop_player(id);
-    }, 30*60*1000);
+    }, self.timeout);
 
-    this.get(id).idle_watch_started = "" + (new Date());
+    return (new Date((new Date()).getTime() + self.timeout)).getTime();
   },
 
   drop_player: function(id) {
