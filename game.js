@@ -97,35 +97,6 @@ bayeux.attach(app);
 app.listen(4011);
 
 
-// with ( require( "fab" ) )
-
-// ( fab )
-
-//   // Listen on the FAB port and establish the faye server
-//   ( listen_with_faye, { port: 0xFAB, extension: serverAuth } )
-
-//   // resource to query player status -- debugging
-//   ( /^\/status/ )
-//     ( player_status )
-
-//   // serve javascript and CSS
-//   (/^\/(javascript|stylesheets)/)
-//     (/^\/([-_\w]+)\.(js|css)$/)
-//       (fab.nodejs.fs)
-//         ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
-//         ( fab.capture )
-//     (404)
-
-//   // serve static HTML
-//   (/^\/([_\w]+)$/)
-//     (fab.nodejs.fs)
-//       ( fab.tmpl, "html/<%= this %>.html" )
-//       ( fab.capture.at, 0 )
-
-//   // anything else is 404 / Not Found
-//   ( 404 );
-
-
 function player_status () {
   var out = this;
   for (var id in players.all()) {
