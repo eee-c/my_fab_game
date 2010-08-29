@@ -51,17 +51,22 @@ var serverAuth = {
     var subscription = message.subscription,
         msgToken     = message.ext && message.ext.authToken;
 
-    // If the message has a player ID
-    if (message.data.id) {
-      Logger.debug("[Faye.incoming]  checking for player: " + message.data.id);
-      Logger.debug("[Faye.incoming]  " + players.get(message.data.id));
+    // Message does not have a player ID
+    if (!message.data.id)
+      return callback(message);
+
+    // Message has a player ID
+    Logger.debug("[Faye.incoming]  checking for player: " + message.data.id);
+
+    players._get(message.data.id, function(player) {
+      Logger.debug("[Faye.incoming]  " + inspect(player));
 
       // If the player is already in the room
-      if (players.get(message.data.id)) {
-        Logger.debug("[Faye.incoming]  token check: " + players.get(message.data.id).token + " " + msgToken);
+      if (player) {
+        Logger.debug("[Faye.incoming]  token check: " + player.token + " " + msgToken);
 
         // If the tokens do not match, stop the message
-        if (players.get(message.data.id).token != msgToken) {
+        if (player.token != msgToken) {
           Logger.warn("rejecting mis-matched token message");
           message.error = 'Invalid player auth token';
         }
@@ -70,10 +75,9 @@ var serverAuth = {
         Logger.debug("[Faye.incoming]  " + message.data.id + " adding message token: " + msgToken);
         message.data.authToken = msgToken;
       }
-    }
 
-    // Call the server back now we're done
-    return callback(message);
+      callback(message);
+    });
   }
 };
 
@@ -141,24 +145,20 @@ function player_status () {
 
 // Player local store
 var players = ({
-  _: { },
-
-  all: function() {
-    return this._;
+  all: function(callback) {
+    return db.allDocs({include_docs:true}, function(err, docs) {
+      callback(docs.rows.map(function(row) {return row.doc;}));
+    });
   },
 
   _get: function(id, callback) {
     Logger.debug("[players.get] trying to get: " + id);
     db.getDoc(id, function(err, res) {
       if (err) {
-        Logger.warn(JSON.stringify(er));
+        Logger.warn(JSON.stringify(err));
       }
       callback(res);
     });
-  },
-
-  get: function(id) {
-    return this._[id];
   },
 
   add_player: function(player) {
@@ -210,7 +210,6 @@ var players = ({
   drop_player: function(id) {
     Logger.info("players.drop_player " + id);
     this.faye.publish("/players/drop", id);
-    delete this._[id];
 
     this._get(id, function(player) {
       Logger.debug("[players.drop_player] " + inspect(player));
@@ -234,11 +233,9 @@ var players = ({
     });
 
     this.faye.subscribe("/players/query", function(q) {
-      var ret = [];
-      for (var id in self._) {
-        ret.push(self._[id].status);
-      }
-      self.faye.publish("/players/all", ret);
+      self.all(function(players) {
+        self.faye.publish("/players/all", players.map(function(player) {return player.status;}) );
+      });
     });
   },
 
