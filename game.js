@@ -57,7 +57,7 @@ var serverAuth = {
     // Message has a player ID
     Logger.debug("[Faye.incoming]  checking for player: " + message.data.id);
 
-    players._get(message.data.id, function(player) {
+    players.get(message.data.id, function(player) {
       Logger.debug("[Faye.incoming]  " + inspect(player));
 
       // If the player is already in the room
@@ -134,7 +134,7 @@ var players = ({
     });
   },
 
-  _get: function(id, callback) {
+  get: function(id, callback) {
     Logger.debug("[players.get] trying to get: " + id);
     db.getDoc(id, function(err, res) {
       if (err) {
@@ -148,7 +148,7 @@ var players = ({
     var self = this;
     var new_id = player.id;
     Logger.info("players.add_player: " + new_id);
-    this._get(new_id, function(old_player) {
+    this.get(new_id, function(old_player) {
       if (!old_player) {
         db.saveDoc(new_id, {token: player.authToken});
 
@@ -160,7 +160,7 @@ var players = ({
 
   update_player_status: function(status) {
     var self = this;
-    this._get(status.id, function(player) {
+    this.get(status.id, function(player) {
       Logger.debug("[players.update_player_status] " + inspect(player));
       if (player) {
         Logger.info("players.update_player_status: " + status.id);
@@ -194,7 +194,7 @@ var players = ({
     Logger.info("players.drop_player " + id);
     this.faye.publish("/players/drop", id);
 
-    this._get(id, function(player) {
+    this.get(id, function(player) {
       Logger.debug("[players.drop_player] " + inspect(player));
       if (player) db.removeDoc(id, player._rev);
     });
