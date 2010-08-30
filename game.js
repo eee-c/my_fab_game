@@ -165,17 +165,19 @@ var players = ({
   timeout: 30*60*1000,
   timeouts: { },
 
-  idle_watch: function(id) {
+  idle_watch: function(id, timeout) {
     if (this.timeouts[id])
       clearTimeout(this.timeouts[id]);
+
+    if (!timeout) timeout = this.timeout;
 
     var self = this;
     this.timeouts[id] = setTimeout(function() {
       Logger.info("timeout " + id +"!");
       self.drop_player(id);
-    }, self.timeout);
+    }, timeout);
 
-    return (new Date((new Date()).getTime() + self.timeout)).getTime();
+    return (new Date((new Date()).getTime() + timeout)).getTime();
   },
 
   drop_player: function(id) {
@@ -210,11 +212,35 @@ var players = ({
     });
   },
 
+  init_players: function() {
+    var self = this;
+
+    var now = (new Date()).getTime();
+    self.all(function(players) {
+      players.forEach(function(player){
+        var timeout = player.timeout - now;
+        if (timeout > 0) {
+          Logger.info("[init_timeouts] " + player._id + " " + timeout);
+          self.idle_watch(player._id, timeout);
+        }
+        else {
+          Logger.info("[init_timeouts] dropping: " + player._id);
+          self.drop_player(player._id);
+        }
+      });
+    });
+  },
+
   init: function() {
     var self = this;
+
     // Ensure that the faye server has fully established by waiting
     // half a second before subscribing to channels
-    setTimeout(function(){self.init_subscriptions();}, 500);
+    setTimeout(function(){
+      self.init_subscriptions();
+      self.init_players();
+    }, 500);
+
     return self;
   }
 }).init();
