@@ -31,8 +31,7 @@ html(lang="en")
 
       |     var room = new Room($("#room-container")[0]);
       |     var goodbye = function() {
-      |       alert("You have been logged out.");
-      |       window.location = window.location.protocol + '//' + window.location.host + window.location.pathname;
+      |       window.location = window.location.protocol + '//' + window.location.host + '/idle_timeout';
       |     };
       |     player_list = new PlayerList(me, room, {onComplete: goodbye});
       |   }

@@ -22,7 +22,10 @@ Logger = {
 Logger.info("Starting up...");
 
 // Create the Express server
-var app = express.createServer();
+var app = express.createServer(
+  express.cookieDecoder(),
+  express.session()
+);
 
 // Serve statics from ./public
 app.use(express.staticProvider(__dirname + '/public'));
@@ -32,7 +35,14 @@ app.use(express.staticProvider(__dirname + '/public'));
 app.set('view engine', 'jade');
 
 app.get('/board', function(req, res) {
-  res.render('board');
+  var flash = req.flash();
+  res.render('board', {locals: {flash: flash}});
+});
+
+app.get('/idle_timeout', function(req, res) {
+//  puts(inspect(req));
+  req.flash('info', 'You were logged out because you weren\'t doing anything.');
+  res.redirect('/board');
 });
 
 
