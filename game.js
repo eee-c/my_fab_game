@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+// Don't crash on errors
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception: ' + err.stack);
+});
+
 var http = require('http'),
     faye = require('faye'),
     puts = require( "sys" ).puts,
