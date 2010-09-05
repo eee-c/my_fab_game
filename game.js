@@ -70,51 +70,65 @@ var serverAuth = {
   }
 };
 
+function attach_faye(server) {
+  var faye_server = new faye.NodeAdapter({
+    mount:    '/faye',
+    timeout:  45
+  });
+
+  faye_server.attach(server);
+
+  // attach the extension ensuring player messages come from the same
+  // client that originally added player to the room
+  faye_server.addExtension(serverAuth);
+}
+
 with ( require( "fab" ) )
 
 ( fab )
 
   // Listen on the FAB port and establish the faye server
-  ( listen_with_faye, { port: 0xFAB, extension: serverAuth } )
+  ( listen, 0xFAB, attach_faye )
 
-  // resource to query player status -- debugging
-  ( /^\/status/ )
-    ( player_status )
+  // // resource to query player status -- debugging
+  // ( /^\/status/ )
+  //   ( player_status )
 
-  // serve javascript and CSS
-  (/^\/(javascript|stylesheets)/)
-    (/^\/([-_\w]+)\.(js|css)$/)
-      (fab.nodejs.fs)
-        ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
-        ( fab.capture )
-    (404)
+  // // serve javascript and CSS
+  // (/^\/(javascript|stylesheets)/)
+  //   (/^\/([-_\w]+)\.(js|css)$/)
+  //     (fab.nodejs.fs)
+  //       ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
+  //       ( fab.capture )
+  //   (404)
 
-  // serve static HTML
-  (/^\/([_\w]+)$/)
-    (fab.nodejs.fs)
-      ( fab.tmpl, "html/<%= this %>.html" )
-      ( fab.capture.at, 0 )
+  // // serve static HTML
+  // (/^\/([_\w]+)$/)
+  //   (fab.nodejs.fs)
+  //     ( fab.tmpl, "html/<%= this %>.html" )
+  //     ( fab.capture.at, 0 )
 
-  // anything else is 404 / Not Found
-  ( 404 );
+  // // anything else is 404 / Not Found
+  // ( 404 );
 
+();
 
-function player_status () {
-  var out = this;
-  for (var id in players.all()) {
-    var player = players.get(id);
-    out = out({body: id})
-             ({body: "\n"})
-             ({body: "  timeout?:" + player.idle_timeout})
-             ({body: "\n"})
-             ({body: "  idle from:" + player.idle_watch_started})
-             ({body: "\n"})
-             ({body: "  x " + player.status.x})
-             ({body:  " y " + player.status.y})
-             ({body: "\n"});
-  }
-  out();
-}
+// function player_status () {
+//   var out = this;
+//   for (var id in players.all()) {
+//     var player = players.get(id);
+//     out = out({body: id})
+//              ({body: "\n"})
+//              ({body: "  timeout?:" + player.idle_timeout})
+//              ({body: "\n"})
+//              ({body: "  idle from:" + player.idle_watch_started})
+//              ({body: "\n"})
+//              ({body: "  x " + player.status.x})
+//              ({body:  " y " + player.status.y})
+//              ({body: "\n"});
+//   }
+//   out();
+// }
 
 // Player local store
 var players = ({
