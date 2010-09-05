@@ -20,21 +20,6 @@ Logger = {
 
 Logger.info("Starting up...");
 
-// Create the Express server
-var app = express.createServer();
-
-// Serve statics from ./public
-app.use(express.staticProvider(__dirname + '/public'));
-
-
-// Render the game board with Jade
-app.set('view engine', 'jade');
-
-app.get('/board', function(req, res) {
-  res.render('board');
-});
-
-
 // Server-side extension to lock player messages to client that added
 // the player in the first place,
 // http://japhr.blogspot.com/2010/08/per-message-authorization-in-faye.html
