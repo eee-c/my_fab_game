@@ -11,7 +11,10 @@ var http = require('http'),
     inspect = require( "sys" ).inspect,
     couchdb = require('node-couchdb/lib/couchdb'),
     client  = couchdb.createClient(5984, 'localhost'),
-    db      = client.db('my-fab-game');
+    db      = client.db('my-fab-game'),
+    fab        = require('fab');
+
+fab.static = require('fab.static');
 
 Logger = {
   level: 1,
@@ -83,12 +86,33 @@ function attach_faye(server) {
   faye_server.addExtension(serverAuth);
 }
 
-with ( require( "fab" ) )
+with ( fab )
 
 ( fab )
 
   // Listen on the FAB port and establish the faye server
   ( listen, 0xFAB, attach_faye )
+
+  (route, /^\/javascript/)
+    (route, /^\/(.*)/)
+      // Stream javascript files from ./javascript
+      (static, "javascript", "text/javascript", "js")
+    ()
+    ('Not found!')
+  ()
+
+  (route, /^\/stylesheets/)
+    (route, /^\/(.*)/)
+      // Stream stylesheets files from ./stylesheets
+      (static, "stylesheets", "text/css", "css")
+    ()
+    ('Not found!')
+  ()
+
+  (route, /^\/(.*)/)
+    // Stream html files from ./html
+    (static, "html", "text/html", "html")
+  ()
 
   // // resource to query player status -- debugging
   // ( /^\/status/ )
