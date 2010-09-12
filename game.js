@@ -93,8 +93,8 @@ with ( fab )
   // Listen on the FAB port and establish the faye server
   ( listen, 0xFAB, attach_faye )
 
-  (route, /^\/javascript/)
-    (route, /^\/(.*)/)
+  (route, /javascript/)
+    (route, /\/([^\/]*)$/)
       // Stream javascript files from ./javascript
       (static, "javascript", "text/javascript", "js")
     ()
@@ -109,50 +109,18 @@ with ( fab )
     ('Not found!')
   ()
 
+  (route, /^\/player_status/)
+    (player_status)
+  ()
+
   (route, /^\/(.*)/)
     // Stream html files from ./html
     (static, "html", "text/html", "html")
   ()
 
-  // // resource to query player status -- debugging
-  // ( /^\/status/ )
-  //   ( player_status )
-
-  // // serve javascript and CSS
-  // (/^\/(javascript|stylesheets)/)
-  //   (/^\/([-_\w]+)\.(js|css)$/)
-  //     (fab.nodejs.fs)
-  //       ( fab.tmpl, "<%= this[0] %>/<%= this[1] %>.<%= this[2] %>" )
-  //       ( fab.capture )
-  //   (404)
-
-  // // serve static HTML
-  // (/^\/([_\w]+)$/)
-  //   (fab.nodejs.fs)
-  //     ( fab.tmpl, "html/<%= this %>.html" )
-  //     ( fab.capture.at, 0 )
-
-  // // anything else is 404 / Not Found
-  // ( 404 );
 
 ();
 
-// function player_status () {
-//   var out = this;
-//   for (var id in players.all()) {
-//     var player = players.get(id);
-//     out = out({body: id})
-//              ({body: "\n"})
-//              ({body: "  timeout?:" + player.idle_timeout})
-//              ({body: "\n"})
-//              ({body: "  idle from:" + player.idle_watch_started})
-//              ({body: "\n"})
-//              ({body: "  x " + player.status.x})
-//              ({body:  " y " + player.status.y})
-//              ({body: "\n"});
-//   }
-//   out();
-// }
 
 // Player local store
 var players = ({
@@ -284,3 +252,18 @@ var players = ({
     return self;
   }
 }).init();
+
+function player_status(write) {
+  return write(function(write) {
+    return fab.stream(function(stream) {
+      stream(write(undefined, { headers: { "Content-Type": "text/plain"} }));
+      players.all(function(list) {
+        list.forEach(function(player) {
+          stream(write(player._id + "\n"));
+        });
+        stream(write("\n"));
+        stream(write());
+      });
+    });
+  });
+}
