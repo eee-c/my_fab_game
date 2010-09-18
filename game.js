@@ -86,7 +86,30 @@ function attach_faye(server) {
   faye_server.addExtension(serverAuth);
 }
 
+var board_js_string =  " var player_list; \
+\
+$(function() { \
+  var kv = location.search.substr(1).split(/=/); \
+  if (kv[0] == 'player' && kv[1]) { \
+    $('#login').hide(); \
+\
+    var me = new Player(kv[1], {animate_with: function(avatar){ \
+      var color = ['#ccc', '#c00', '#0c0'][Math.floor(3*Math.random(3))]; \
+      avatar.attr({fill: color}); \
+    } }); \
+\
+    var room = new Room($('#room-container')[0]); \
+    var goodbye = function() { \
+      alert('You have been logged out.'); \
+      window.location = window.location.protocol + '//' + window.location.host + window.location.pathname; \
+    }; \
+    player_list = new PlayerList(me, room, {onComplete: goodbye}); \
+  } \
+}); \
+";
+
 with ( fab )
+with ( html )
 
 ( fab )
 
@@ -109,15 +132,70 @@ with ( fab )
     ('Not found!')
   ()
 
-  (route, /^\/player_status/)
-    (player_status)
-  ()
+  // (route, /^\/(.*)/)
+  //   // Stream html files from ./html
+  //   (static, "html", "text/html", "html")
+  // ()
 
-  (route, /^\/(.*)/)
-    // Stream html files from ./html
-    (static, "html", "text/html", "html")
-  ()
+  ( HTML )
+    ( HEAD )
+      ( TITLE )( "My (fab) Game" )()
+      ( LINK, { href:  "/stylesheets/board.css",
+                media: "screen",
+                rel:   "stylesheet",
+                type:  "text/css" } )
+      ( SCRIPT, { src:  "/javascript/jquery-min.js",
+                  type: "application/javascript" } )()
 
+      ( SCRIPT, { src:  "/javascript/json2.js",
+                  type: "application/javascript" } )()
+
+      ( SCRIPT, { src: "/faye.js",
+                  type: "text/javascript" } )()
+
+      ( SCRIPT, { src:  "/javascript/raphael-min.js",
+                  type: "application/javascript" } )()
+      ( SCRIPT, { src:  "/javascript/player.js",
+                  type: "application/javascript" } )()
+      ( SCRIPT, { src:  "/javascript/player_list.js",
+                  type: "application/javascript" } )()
+      ( SCRIPT, { src:  "/javascript/room.js",
+                  type: "application/javascript" } )()
+
+      ( SCRIPT, { type: "application/javascript" } )
+        ( board_js_string )
+      ()
+
+    ()
+    ( BODY )
+
+      (route, /^\/board/)
+
+
+        ( FORM, { id: "login", method: "get" } )
+          ( LABEL )
+            ( "Name" )
+            ( INPUT, { type: "text", name: "player" } )
+          ()
+          ( INPUT, { type: "submit", value: "Play" } )
+        ()
+        ( DIV, { id: "room-container" } )()
+      ()
+
+      (route, /^\/player_status/)
+        ( PRE )
+          ( player_status )
+          // ( "player_status 01" )
+          // ( "\n" )
+          // ( "player_status 02" )
+          // ( "\n" )
+          // ( "player_status 03" )
+          // ( "\n" )
+        () // PRE
+      () // route
+
+    () // BODY
+  () // HTML
 
 ();
 
@@ -256,12 +334,12 @@ var players = ({
 function player_status(write) {
   return write(function(write) {
     return fab.stream(function(stream) {
-      stream(write(undefined, { headers: { "Content-Type": "text/plain"} }));
       players.all(function(list) {
+        var ret = "";
         list.forEach(function(player) {
-          stream(write(player._id + "\n"));
+          ret += player._id + "\n";
         });
-        stream(write("\n"));
+        stream(write(ret + "\n"));
         stream(write());
       });
     });
