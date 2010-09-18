@@ -24,3 +24,7 @@ label {
   border: none;
   background-color: #fff;
 }
+pre {
+  padding: 8px;
+  background-color: #fff;
+}
