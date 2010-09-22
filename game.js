@@ -15,6 +15,7 @@ var http = require('http'),
     fab        = require('fab');
 
 fab.static = require('fab.static');
+fab.accept = require('fab.accept');
 
 Logger = {
   level: 1,
@@ -109,35 +110,9 @@ $(function() { \
 ";
 
 with ( fab )
-with ( html )
+with ( html ) head =
 
-( fab )
-
-  // Listen on the FAB port and establish the faye server
-  ( listen, 0xFAB, attach_faye )
-
-  (route, /javascript/)
-    (route, /\/([^\/]*)$/)
-      // Stream javascript files from ./javascript
-      (static, "javascript", "text/javascript", "js")
-    ()
-    ('Not found!')
-  ()
-
-  (route, /^\/stylesheets/)
-    (route, /^\/(.*)/)
-      // Stream stylesheets files from ./stylesheets
-      (static, "stylesheets", "text/css", "css")
-    ()
-    ('Not found!')
-  ()
-
-  // (route, /^\/(.*)/)
-  //   // Stream html files from ./html
-  //   (static, "html", "text/html", "html")
-  // ()
-
-  ( HTML )
+  ( fab )
     ( HEAD )
       ( TITLE )( "My (fab) Game" )()
       ( LINK, { href:  "/stylesheets/board.css",
@@ -167,11 +142,56 @@ with ( html )
       ()
 
     ()
-    ( BODY )
-
-      (route, /^\/board/)
+  ();
 
 
+
+with ( fab )
+with ( html )
+
+( fab )
+
+  // Listen on the FAB port and establish the faye server
+  ( listen, 0xFAB, attach_faye )
+
+  (route, /javascript/)
+    (route, /\/([^\/]*)$/)
+      // Stream javascript files from ./javascript
+      (static, "javascript", "text/javascript", "js")
+    ()
+    ('Not found!')
+  ()
+
+  (route, /^\/stylesheets/)
+    (route, /^\/(.*)/)
+      // Stream stylesheets files from ./stylesheets
+      (static, "stylesheets", "text/css", "css")
+    ()
+    ('Not found!')
+  ()
+
+  ( route, /^\/status/ )
+    ( accept.HTML )
+      ( HTML )
+        ( head )
+        ( BODY )
+          ( PRE )
+            ( player_status )
+          ()
+        ()
+      ()
+    ()
+    ( accept.PLAIN )
+      (undefined, {headers: { "Content-Type": "text/plain"}})
+      ( player_status )
+    ()
+    ("not found")
+  ()
+
+  (route, /^\/board/)
+    ( HTML )
+      ( head )
+      ( BODY )
         ( FORM, { id: "login", method: "get" } )
           ( LABEL )
             ( "Name" )
@@ -180,22 +200,10 @@ with ( html )
           ( INPUT, { type: "submit", value: "Play" } )
         ()
         ( DIV, { id: "room-container" } )()
-      ()
+      () // BODY
 
-      (route, /^\/player_status/)
-        ( PRE )
-          ( player_status )
-          // ( "player_status 01" )
-          // ( "\n" )
-          // ( "player_status 02" )
-          // ( "\n" )
-          // ( "player_status 03" )
-          // ( "\n" )
-        () // PRE
-      () // route
-
-    () // BODY
-  () // HTML
+    () // HTML
+  ()
 
 ();
 
