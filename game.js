@@ -185,7 +185,7 @@ with ( html )
       (undefined, {headers: { "Content-Type": "text/plain"}})
       ( player_status )
     ()
-    ("not found")
+    ( "not found", { status: 404 } )
   ()
 
   (route, /^\/board/)
