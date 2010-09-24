@@ -42,8 +42,10 @@ $(function() { \
 \
     var room = new Room($('#room-container')[0]); \
     var goodbye = function() { \
-      alert('You have been logged out.'); \
-      window.location = window.location.protocol + '//' + window.location.host + window.location.pathname; \
+      window.location = window.location.protocol + '//' + \
+        window.location.host + \
+        window.location.pathname + \
+        '?message=You have been logged out.'  ; \
     }; \
     player_list = new PlayerList(me, room, {onComplete: goodbye}); \
   } \
@@ -133,6 +135,7 @@ with ( html )
     ( HTML )
       ( head )
       ( BODY )
+        ( info )
         ( FORM, { id: "login", method: "get" } )
           ( LABEL )
             ( "Name" )
@@ -163,6 +166,15 @@ function player_status(write) {
         stream(write());
       });
     });
+  });
+}
+
+function info(write) {
+  return write(function(write, head) {
+    var q = require('querystring').parse(head.url.query);
+    if (q.message)
+      write('<div id="info">' + q.message + '</div>');
+    return write;
   });
 }
 
