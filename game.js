@@ -8,9 +8,6 @@ process.on('uncaughtException', function (err) {
 var http = require('http'),
     faye = require('faye'),
     inspect = require( "sys" ).inspect,
-    couchdb = require('node-couchdb/lib/couchdb'),
-    client  = couchdb.createClient(5984, 'localhost'),
-    db      = client.db('my-fab-game'),
     fab     = require('fab');
 
 // Additional (fab) apps
@@ -19,7 +16,7 @@ fab.accept = require('fab.accept');
 
 
 // Player local store
-var players = (require("./lib/players")).init(db);
+var players = (require("./lib/players")).init();
 
 var Logger = require("./lib/logger");
 
@@ -160,7 +157,7 @@ function player_status(write) {
       players.all(function(list) {
         var ret = "";
         list.forEach(function(player) {
-          ret += player._id + "\n";
+          ret += player.status.id + "\n";
         });
         stream(write(ret + "\n"));
         stream(write());
