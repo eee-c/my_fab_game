@@ -70,6 +70,8 @@ with ( html ) head =
 
       ( SCRIPT, { src:  "/javascript/raphael-min.js",
                   type: "application/javascript" } )()
+      ( SCRIPT, { src:  "/javascript/raphael-animate_frames.js",
+                  type: "application/javascript" } )()
       ( SCRIPT, { src:  "/javascript/player.js",
                   type: "application/javascript" } )()
       ( SCRIPT, { src:  "/javascript/player_list.js",
