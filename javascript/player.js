@@ -16,7 +16,6 @@ var Player = function(id, options) {
 
   this.direction = { x: 1, y: 0 };
 
-  this.animate_with = options.animate_with || function (avatar) { };
   this.initial_walk = true;
 
   this.faye = new Faye.Client('/faye');
@@ -65,10 +64,11 @@ Player.prototype.notify = function(evt) {
 
 
 Player.prototype.stop = function () {
-  this.avatar.stop();
+  //TODO -- re-enable
+  //this.avatar.stop();
 
-  this.x = this.avatar.attrs.cx;
-  this.y = this.avatar.attrs.cy;
+  this.x = this.avatar.getBBox().x;
+  this.y = this.avatar.getBBox().y;
 };
 
 Player.prototype._bounce_away = function(from_x, from_y) {
@@ -95,9 +95,6 @@ Player.prototype.bounce_to = function(x, y) {
 Player.prototype.walk_to = function(x, y) {
   this.stop();
 
-  var p = "M" + Math.floor(this.x) + " " + Math.floor(this.y) +
-         " L" +                 x  + " " +                 y;
-
   var x_diff = x - this.x;
   var y_diff = y - this.y;
   var distance = Math.sqrt(x_diff * x_diff + y_diff * y_diff);
@@ -105,10 +102,8 @@ Player.prototype.walk_to = function(x, y) {
 
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
 
-  var self = this;
-  this.avatar.animateAlong(p, time, function(){
-    self.initial_walk = false;
-  });
+  // TODO self.initial_walk = false after walk has started
+  this.avatar.translate(x, y, time);
 
   this.x = x;
   this.y = y;
@@ -144,23 +139,18 @@ Player.prototype.attach_avatar = function(avatar) {
 
   var animation_count = 0;
   avatar.onAnimation(function(){
-    self.label.attr({x: avatar.attr("cx"), y: avatar.attr("cy") + Player.shadow_distance});
-
-    if (++animation_count > 25) {
-      self.animate_with(this);
-      animation_count = 0;
-    }
+    self.label.attr({x: avatar.getCenter().x, y: avatar.getCenter().y + Player.shadow_distance});
 
     if (self.balloon) {
-      self.balloon.attr({x: avatar.attr("cx"), y: avatar.attr("cy") - Player.shadow_distance});
+      self.balloon.attr({x: avatar.getBBox().x, y: avatar.getBBox().y - Player.shadow_distance});
     }
 
-    var c_x = avatar.attr("cx") +
+    var c_x = avatar.getCenter().x +
               $(self.avatar.paper.canvas).parent().offset().left -
               $(document).scrollLeft() +
               1.1 * self.direction.x * Player.radius;
 
-    var c_y = avatar.attr("cy") +
+    var c_y = avatar.getBBox().y +
               $(self.avatar.paper.canvas).parent().offset().top -
               $(document).scrollTop() +
               1.1 * self.direction.y * Player.radius;
