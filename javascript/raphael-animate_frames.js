@@ -12,6 +12,14 @@ Raphael.fn.svg_frames = function() {
       }
     },
 
+    remove: function() {
+      for (var i=0; i<frames.length; i++) {
+        for (var j=0; j<frames[i].length; j++) {
+          frame[j].remove();
+        };
+      }
+    },
+
     draw_object: function(attr_list) {
       var objects = [];
       for (var i=0; i<attr_list.length; i++) {
