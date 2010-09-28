@@ -102,8 +102,10 @@ Player.prototype.walk_to = function(x, y) {
 
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
 
-  // TODO self.initial_walk = false after walk has started
   this.avatar.translate(x, y, time);
+
+  var self = this;
+  setTimeout(function() {self.initial_walk=false;}, 2*1000);
 
   this.x = x;
   this.y = y;
@@ -156,6 +158,11 @@ Player.prototype.attach_avatar = function(avatar) {
               1.1 * self.direction.y * Player.radius;
 
     var c_el = document.elementFromPoint(c_x, c_y);
+
+    // console.log(c_el);
+    // console.log("initial_walk: " + self.initial_walk);
+    // console.log("mid_bounce: " + self.mid_bounce);
+    // console.log("is_player_circle: " + c_el.is_player_circle);
 
     if (!self.initial_walk &&
         !self.mid_bounce &&

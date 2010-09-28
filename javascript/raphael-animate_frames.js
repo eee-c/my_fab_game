@@ -10,6 +10,7 @@ Raphael.fn.svg_frames = function() {
       for (var i=0; i<frame_list.length; i++) {
         this.list.push(this.draw_object(frame_list[i]));
       }
+      this.node = this.list[0][this.list[0].length-1].node;
     },
 
     remove: function() {
@@ -57,6 +58,13 @@ Raphael.fn.svg_frames = function() {
       };
     },
 
+    animate: function(new_attrs, ms) {
+      if (new_attrs.cx || new_attrs.cy) {
+        this.translate(new_attrs.cx || this.getCenter().x,
+                       new_attrs.cy || this.getCenter().y,
+                       ms);
+      }
+    },
 
     translate: function(x, y, ms) {
       for (var i=0; i<this.list.length; i++) {
