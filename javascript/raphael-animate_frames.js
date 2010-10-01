@@ -1,42 +1,13 @@
 Raphael.fn.svg_frames = function() {
   var paper = this;
 
-  var frames = {
-    list: [],
-    interval: 333,
-    paper: paper,
+  var Frame = function(paths) {
+    this.paths = paths;
+    this.elements = [];
+  };
 
-    add: function(frame_list) {
-      for (var i=0; i<frame_list.length; i++) {
-        this.list.push(this.draw_object(frame_list[i]));
-      }
-      this.node = this.list[0][this.list[0].length-1].node;
-    },
-
-    remove: function() {
-      for (var i=0; i<frames.length; i++) {
-        for (var j=0; j<frames[i].length; j++) {
-          frame[j].remove();
-        };
-      }
-    },
-
-    draw_object: function(attr_list) {
-      var objects = [];
-      for (var i=0; i<attr_list.length; i++) {
-        objects.push(this.draw_part(attr_list[i]));
-      };
-      return objects;
-    },
-
-    draw_part: function(attrs) {
-      return paper
-        .path(attrs.d)
-        .attr(this.attrs_from_string(attrs.style))
-        .hide();
-    },
-
-    attrs_from_string: function(str) {
+  Frame.prototype.draw = function () {
+    function attrs_from_string(str) {
       var attrs = {};
       str.split(/;/).
         forEach(function(pair) {
@@ -44,33 +15,106 @@ Raphael.fn.svg_frames = function() {
           attrs[kv[0]] = kv[1];
         });
       return attrs;
+    }
+
+    for (var i=0; i<this.paths.length; i++) {
+      var attrs = this.paths[i];
+
+      var el = paper
+        .path(attrs.d)
+        .attr(attrs_from_string(attrs.style))
+        .hide();
+
+      this.elements.push(el);
+    };
+
+    this.node = this.elements[this.elements.length - 1].node;
+  };
+
+  Frame.prototype.remove = function () {
+    for (var i=0; i<this.elements.length; i++) {
+      this.elements[i].remove();
+    };
+  };
+
+  Frame.prototype.show = function() {
+    for (var i=0; i<this.elements.length; i++) {
+      this.elements[i].show();
+    };
+  };
+
+  Frame.prototype.hide = function() {
+    for (var i=0; i<this.elements.length; i++) {
+      this.elements[i].hide();
+    };
+  };
+
+  Frame.prototype.stop = function() {
+    for (var i=0; i<this.elements.length; i++) {
+      this.elements[i].stop();
+    };
+  };
+
+  Frame.prototype.translate = function(x, y, ms) {
+    var el = this.elements[this.elements.length - 1];
+
+    // offset between end coordinates and current location
+    var x_diff = x - el.getBBox().x;
+    var y_diff = y - el.getBBox().y;
+
+    for (var i=0; i<this.elements.length; i++) {
+      var obj = this.elements[i];
+      // calculate path starting from absolute coordinates and moving
+      // relatively from there by the offset
+      var p = "M " + obj.getBBox().x + " " + obj.getBBox().y +
+             " l " + x_diff          + " " + y_diff;
+
+       // animate along that path
+      if (ms && ms > 50)
+        obj.animateAlong(p, ms);
+      else
+        obj.translate(x_diff, y_diff);
+    };
+  };
+
+  Frame.prototype.getBBox = function() {
+    return this.elements[this.elements.length - 1].getBBox();
+  };
+
+  Frame.prototype.onAnimation = function(fn) {
+    this.elements[this.elements.length - 1].onAnimation(fn);
+  };
+
+
+  var frames = {
+    list: [],
+    interval: 333,
+    paper: paper,
+
+    add: function(frame_list) {
+      for (var i=0; i<frame_list.length; i++) {
+        var frame = new Frame(frame_list[i]);
+        frame.draw();
+        this.list.push(frame);
+      }
+      this.node = this.list[0].node;
     },
 
-    show_frame: function(frame) {
-      for (var i=0; i<frame.length; i++) {
-        frame[i].show();
-      };
-    },
-
-    hide_frame: function(frame) {
-      for (var i=0; i<frame.length; i++) {
-        frame[i].hide();
-      };
+    remove: function() {
+      for (var i=0; i<this.list.length; i++) {
+        this.list[i].remove();
+      }
     },
 
     hide_all_frames: function() {
-      var frames = this.list;
-      for (var i=0; i<frames.length; i++) {
-        this.hide_frame(frames[i]);
+      for (var i=0; i<this.list.length; i++) {
+        this.list[i].hide();
       }
     },
 
     stop: function() {
-      var frames = this.list;
-      for (var i=0; i<frames.length; i++) {
-        for (var j=0; j<frames[i].length; j++) {
-          frames[i][j].stop();
-        }
+      for (var i=0; i<this.list.length; i++) {
+        this.list[i].stop();
       }
     },
 
@@ -88,7 +132,7 @@ Raphael.fn.svg_frames = function() {
           c.animate({cx: x, cy: y}, ms, easing, function () {
             c.remove();
             self.translate(x, y);
-            self.show_frame(self.list[0]);
+            self.list[0].show();
           });
         }
         else {
@@ -99,7 +143,7 @@ Raphael.fn.svg_frames = function() {
 
     translate: function(x, y, ms) {
       for (var i=0; i<this.list.length; i++) {
-        this.translate_object(this.list[i], x, y, ms);
+        this.list[i].translate(x, y, ms);
       }
       if (ms && ms > 50) this.toggle_frames(ms);
       return this;
@@ -114,10 +158,10 @@ Raphael.fn.svg_frames = function() {
 
       for (var i=0; i<frames.length; i++) {
         if (i == current_frame) {
-          this.show_frame(frames[i]);
+          frames[i].show();
         }
         else {
-          this.hide_frame(frames[i]);
+          frames[i].hide();
         }
       }
 
@@ -127,28 +171,8 @@ Raphael.fn.svg_frames = function() {
       }
     },
 
-    translate_object: function(frame, x, y, ms) {
-      // offset between end coordinates and current location
-      var x_diff = x - frame[frame.length-1].getBBox().x;
-      var y_diff = y - frame[frame.length-1].getBBox().y;
-
-      for (var i=0; i<frame.length; i++) {
-        var obj = frame[i];
-        // calculate path starting from absolute coordinates and moving
-        // relatively from there by the offset
-        var p = "M " + obj.getBBox().x + " " + obj.getBBox().y +
-               " l " + x_diff          + " " + y_diff;
-
-         // animate along that path
-        if (ms && ms > 50)
-          obj.animateAlong(p, ms);
-        else
-          obj.translate(x_diff, y_diff);
-      };
-    },
-
     getBBox: function() {
-      return this.list[0][this.list[0].length-1].getBBox();
+      return this.list[0].getBBox();
     },
 
     getCenter: function() {
@@ -159,15 +183,15 @@ Raphael.fn.svg_frames = function() {
       };
     },
 
-    attr: function() {
-      // delegate to last object in first frame
-      var obj = this.list[0][this.list[0].length-1];
-      console.debug(arguments);
-      return obj.attr.apply(obj, arguments);
-    },
+    // attr: function() {
+    //   // delegate to last object in first frame
+    //   var obj = this.list[0][this.list[0].length-1];
+    //   console.debug(arguments);
+    //   return obj.attr.apply(obj, arguments);
+    // },
 
     onAnimation: function(fn) {
-      this.list[0][this.list[0].length-1].onAnimation(fn);
+      this.list[0].onAnimation(fn);
     }
 
   };
@@ -177,7 +201,7 @@ Raphael.fn.svg_frames = function() {
   else
     frames.add(arguments[0]);
 
-  frames.show_frame(frames.list[0]);
+  frames.list[0].show();
 
   return frames;
 };
