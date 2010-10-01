@@ -58,11 +58,42 @@ Raphael.fn.svg_frames = function() {
       };
     },
 
-    animate: function(new_attrs, ms) {
+    hide_all_frames: function() {
+      var frames = this.list;
+      for (var i=0; i<frames.length; i++) {
+        this.hide_frame(frames[i]);
+      }
+    },
+
+    stop: function() {
+      var frames = this.list;
+      for (var i=0; i<frames.length; i++) {
+        for (var j=0; j<frames[i].length; j++) {
+          frames[i][j].stop();
+        }
+      }
+    },
+
+    animate: function(new_attrs, ms, easing) {
       if (new_attrs.cx || new_attrs.cy) {
-        this.translate(new_attrs.cx || this.getCenter().x,
-                       new_attrs.cy || this.getCenter().y,
-                       ms);
+        var x = new_attrs.cx || this.getCenter().x
+           ,y = new_attrs.cy || this.getCenter().y;
+        if (easing) {
+          var c = this.paper.circle(this.getCenter().x,
+                                    this.getCenter().y,
+                                    20);
+          if (this.toggler) clearTimeout(this.toggler);
+          this.hide_all_frames();
+          var self = this;
+          c.animate({cx: x, cy: y}, ms, easing, function () {
+            c.remove();
+            self.translate(x, y);
+            self.show_frame(self.list[0]);
+          });
+        }
+        else {
+          this.translate(x, y, ms);
+        }
       }
     },
 
@@ -92,7 +123,7 @@ Raphael.fn.svg_frames = function() {
 
       if (count < Math.floor(ms / self.interval)) {
         var fn = function(){self.toggle_frames(ms, count+1);};
-        setTimeout(fn, self.interval);
+        this.toggler = setTimeout(fn, self.interval);
       }
     },
 
@@ -136,7 +167,7 @@ Raphael.fn.svg_frames = function() {
     },
 
     onAnimation: function(fn) {
-      this.list[0][0].onAnimation(fn);
+      this.list[0][this.list[0].length-1].onAnimation(fn);
     }
 
   };
