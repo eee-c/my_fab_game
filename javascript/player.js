@@ -65,7 +65,7 @@ Player.prototype.notify = function(evt) {
 
 Player.prototype.stop = function () {
   //TODO -- re-enable
-  //this.avatar.stop();
+  this.avatar.stop();
 
   this.x = this.avatar.getBBox().x;
   this.y = this.avatar.getBBox().y;
