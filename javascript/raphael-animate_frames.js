@@ -31,29 +31,17 @@ Raphael.fn.svg_frames = function() {
     this.node = this.elements[this.elements.length - 1].node;
   };
 
-  Frame.prototype.remove = function () {
-    for (var i=0; i<this.elements.length; i++) {
-      this.elements[i].remove();
-    };
-  };
+  var methods = ['remove', 'show', 'hide', 'stop'];
+  for (var i=0; i<methods.length; i++) {
+    Frame.prototype[methods[i]] = function(method) {
+      return function () {
+        for (var j=0; j<this.elements.length; j++) {
+          this.elements[j][method]();
+        };
+      };
+    }(methods[i]);
+  }
 
-  Frame.prototype.show = function() {
-    for (var i=0; i<this.elements.length; i++) {
-      this.elements[i].show();
-    };
-  };
-
-  Frame.prototype.hide = function() {
-    for (var i=0; i<this.elements.length; i++) {
-      this.elements[i].hide();
-    };
-  };
-
-  Frame.prototype.stop = function() {
-    for (var i=0; i<this.elements.length; i++) {
-      this.elements[i].stop();
-    };
-  };
 
   Frame.prototype.translate = function(x, y, ms) {
     var el = this.elements[this.elements.length - 1];
