@@ -100,7 +100,7 @@ Raphael.fn.svg_frames = function() {
 
     hide: delegate_to_frame('hide'),
 
-    stop: raphael_delegator('stop'),
+    stop: delegate_to_frame('stop'),
 
     animate: function(new_attrs, ms, easing) {
       if (new_attrs.cx || new_attrs.cy) {
