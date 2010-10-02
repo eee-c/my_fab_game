@@ -74,6 +74,14 @@ Raphael.fn.svg_frames = function() {
   };
 
 
+  function raphael_delegator(method) {
+    return function() {
+      for (var i=0; i<this.list.length; i++) {
+        this.list[i][method]();
+      }
+    };
+  }
+
   var frames = {
     list: [],
     interval: 333,
@@ -88,23 +96,11 @@ Raphael.fn.svg_frames = function() {
       this.node = this.list[0].node;
     },
 
-    remove: function() {
-      for (var i=0; i<this.list.length; i++) {
-        this.list[i].remove();
-      }
-    },
+    remove: raphael_delegator('remove'),
 
-    hide_all_frames: function() {
-      for (var i=0; i<this.list.length; i++) {
-        this.list[i].hide();
-      }
-    },
+    hide: raphael_delegator('hide'),
 
-    stop: function() {
-      for (var i=0; i<this.list.length; i++) {
-        this.list[i].stop();
-      }
-    },
+    stop: raphael_delegator('stop'),
 
     animate: function(new_attrs, ms, easing) {
       if (new_attrs.cx || new_attrs.cy) {
@@ -115,7 +111,7 @@ Raphael.fn.svg_frames = function() {
                                     this.getCenter().y,
                                     20);
           if (this.toggler) clearTimeout(this.toggler);
-          this.hide_all_frames();
+          this.hide();
           var self = this;
           c.animate({cx: x, cy: y}, ms, easing, function () {
             c.remove();
