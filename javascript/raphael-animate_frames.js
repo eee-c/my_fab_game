@@ -74,7 +74,7 @@ Raphael.fn.svg_frames = function() {
   };
 
 
-  function raphael_delegator(method) {
+  function delegate_to_frame(method) {
     return function() {
       for (var i=0; i<this.list.length; i++) {
         this.list[i][method]();
@@ -96,9 +96,9 @@ Raphael.fn.svg_frames = function() {
       this.node = this.list[0].node;
     },
 
-    remove: raphael_delegator('remove'),
+    remove: delegate_to_frame('remove'),
 
-    hide: raphael_delegator('hide'),
+    hide: delegate_to_frame('hide'),
 
     stop: raphael_delegator('stop'),
 
