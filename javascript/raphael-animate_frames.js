@@ -4,6 +4,9 @@ Raphael.fn.svg_frames = function() {
   var Frame = function(paths) {
     this.paths = paths;
     this.elements = [];
+
+    this.draw();
+    this.original_offsets = this.offsets();
   };
 
   Frame.prototype.draw = function () {
@@ -44,11 +47,11 @@ Raphael.fn.svg_frames = function() {
 
 
   Frame.prototype.translate = function(x, y, ms) {
-    var el = this.elements[this.elements.length - 1];
+    var self = this;
 
     // offset between end coordinates and current location
-    var x_diff = x - el.getBBox().x;
-    var y_diff = y - el.getBBox().y;
+    var x_diff = x - this.getBBox().x;
+    var y_diff = y - this.getBBox().y;
 
     for (var i=0; i<this.elements.length; i++) {
       var obj = this.elements[i];
@@ -63,6 +66,8 @@ Raphael.fn.svg_frames = function() {
       else
         obj.translate(x_diff, y_diff);
     };
+
+    this.tighten();
   };
 
   Frame.prototype.getBBox = function() {
@@ -71,6 +76,28 @@ Raphael.fn.svg_frames = function() {
 
   Frame.prototype.onAnimation = function(fn) {
     this.elements[this.elements.length - 1].onAnimation(fn);
+  };
+
+  Frame.prototype.offsets = function() {
+    var diffs = []
+       ,main  = this.getBBox();
+
+    for (var i=0; i<this.elements.length-1; i++) {
+      var box = this.elements[i].getBBox();
+      diffs.push([main.x - box.x, main.y - box.y]);
+    }
+
+    return diffs;
+  };
+
+  Frame.prototype.tighten = function() {
+    var offsets = this.offsets();
+    for (var i=0; i<offsets.length; i++) {
+      var x_diff = offsets[i][0] - this.original_offsets[i][0]
+         ,y_diff = offsets[i][1] - this.original_offsets[i][1];
+
+      this.elements[i].translate(x_diff, y_diff);
+    }
   };
 
 
@@ -90,7 +117,6 @@ Raphael.fn.svg_frames = function() {
     add: function(frame_list) {
       for (var i=0; i<frame_list.length; i++) {
         var frame = new Frame(frame_list[i]);
-        frame.draw();
         this.list.push(frame);
       }
       this.node = this.list[0].node;
