@@ -129,6 +129,10 @@ Player.prototype.quit = function() {
   delete this.id;
 };
 
+Player.prototype.frames = function() {
+  return typeof(player_frames) === "undefined" ? undefined : player_frames;
+};
+
 Player.prototype.attach_avatar = function(avatar) {
   var self = this;
   this.avatar = avatar;

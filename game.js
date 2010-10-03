@@ -25,7 +25,7 @@ Logger.info("Starting up...");
 
 // Partials and in-page javascript
 
-var board_js_string =  " var player_list; \
+var board_js_string =  "var player_list; \
 \
 $(function() { \
   var kv = location.search.substr(1).split(/=/); \
@@ -77,6 +77,9 @@ with ( html ) head =
       ( SCRIPT, { src:  "/javascript/player_list.js",
                   type: "application/javascript" } )()
       ( SCRIPT, { src:  "/javascript/room.js",
+                  type: "application/javascript" } )()
+
+      ( SCRIPT, { src:  "/javascript/player_frames.js",
                   type: "application/javascript" } )()
 
       ( SCRIPT, { type: "application/javascript" } )
