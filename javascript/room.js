@@ -43,11 +43,18 @@ Room.prototype.decorate_event = function(evt) {
 };
 
 Room.prototype.draw_player = function(player, color) {
-  // set x-y position from player.x, player.y
-  return this
-    .paper
-    .svg_frames(player.frames())
-    .translate(player.x, player.y);
+  if (player.frames()) {
+    // set x-y position from player.x, player.y
+    return this
+      .paper
+      .svg_frames(player.frames())
+      .translate(player.x, player.y);
+  }
+  else {
+    var c = this.paper.circle(player.x, player.y, Player.radius);
+    c.attr({fill: color, "fill-opacity": 0.5, stroke: '#000', "stroke-width": 2, "stroke-opacity": 1.0});
+    return c;
+  }
 };
 
 Room.prototype.draw = function() {

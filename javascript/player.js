@@ -101,7 +101,15 @@ Player.prototype.walk_to = function(x, y) {
 
   var time = Player.time_to_max_walk * ( distance / Player.max_walk );
 
-  this.avatar.translate(x, y, time);
+  if (this.frames()) {
+    this.avatar.translate(x, y, time);
+  }
+  else {
+    var p = "M" + Math.floor(this.x) + " " + Math.floor(this.y) +
+           " L" +                 x  + " " +                 y;
+
+    this.avatar.animateAlong(p, time);
+  }
 
   var self = this;
   setTimeout(function() {self.initial_walk=false;}, 2*1000);
@@ -133,6 +141,18 @@ Player.prototype.frames = function() {
   return typeof(player_frames) === "undefined" ? undefined : player_frames;
 };
 
+Player.prototype.center = function() {
+  if (this.frames()) {
+    return this.avatar.getCenter();
+  }
+  else {
+    return {
+       x: this.avatar.attr("cx"),
+       y: this.avatar.attr("cy")
+    };
+  }
+};
+
 Player.prototype.attach_avatar = function(avatar) {
   var self = this;
   this.avatar = avatar;
@@ -144,18 +164,18 @@ Player.prototype.attach_avatar = function(avatar) {
 
   var animation_count = 0;
   avatar.onAnimation(function(){
-    self.label.attr({x: avatar.getCenter().x, y: avatar.getCenter().y + Player.shadow_distance});
+    self.label.attr({x: self.center().x, y: self.center().y + Player.shadow_distance});
 
     if (self.balloon) {
       self.balloon.attr({x: avatar.getBBox().x, y: avatar.getBBox().y - Player.shadow_distance});
     }
 
-    var c_x = avatar.getCenter().x +
+    var c_x = self.center().x +
               $(self.avatar.paper.canvas).parent().offset().left -
               $(document).scrollLeft() +
               1.1 * self.direction.x * Player.radius;
 
-    var c_y = avatar.getBBox().y +
+    var c_y = self.center().y +
               $(self.avatar.paper.canvas).parent().offset().top -
               $(document).scrollTop() +
               1.1 * self.direction.y * Player.radius;
