@@ -22,7 +22,7 @@ Logger.info("Starting up...");
 var app = express.createServer();
 
 // Serve statics from ./public
-app.use(express.staticProvider(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'));
 
 
 // Render the game board with Jade
