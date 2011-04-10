@@ -2,7 +2,18 @@
 
 This is a `<canvas>` based room "game" that I am putting together for the kids.  Ultimately it should allow your character to mill about the room and talk to other characters in the room.  My kids seem to think this is the height of online gaming.
 
-The backend is fab.js based (which is, itself, node.js based).  With node.js installed and the fab.js library installed in `~/.node_libraries`, you should be able to run this as:
+The backend is fab.js based (which is, itself, node.js based).  The full list of dependencies includes:
+
+<pre><code>
+   npm install faye
+   npm install fab
+   npm install fab.static
+   npm install fab.accept
+   npm install dirty
+</code></pre>
+
+
+With node.js installed and the fab.js library installed in `~/.node_libraries`, you should be able to run this as:
 
 > node game.js
 
