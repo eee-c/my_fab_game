@@ -33,71 +33,16 @@ app.get('/board', function(req, res) {
 });
 
 
-// Server-side extension to lock player messages to client that added
-// the player in the first place,
-// http://japhr.blogspot.com/2010/08/per-message-authorization-in-faye.html
-var serverAuth = {
-  incoming: function(message, callback) {
-    // Let non-meta messages through
-    if (message.channel.indexOf('/meta/') === 0)
-      return callback(message);
-
-    puts(message.channel);
-
-    // Get subscribed channel and auth token
-    var subscription = message.subscription,
-        msgToken     = message.ext && message.ext.authToken;
-
-    // If the message has a player ID
-    if (message.data.id) {
-      puts("  checking for player: " + message.data.id);
-      puts(players);
-      puts(players.get(message.data.id));
-
-      // If the player is already in the room
-      if (players.get(message.data.id)) {
-        puts("[token check] " + players.get(message.data.id).token + " " + msgToken);
-
-        // If the tokens do not match, stop the message
-        if (players.get(message.data.id).token != msgToken) {
-          puts("rejecting mis-matched token message");
-          message.error = 'Invalid player auth token';
-        }
-      }
-      else {
-        puts(message.data.id + " adding message token: " + msgToken);
-        message.data.authToken = msgToken;
-      }
-    }
-
-    // Call the server back now we're done
-    return callback(message);
-  }
-};
-
 // Faye nodejs adapter
 var bayeux = new faye.NodeAdapter({
   mount:    '/faye',
   timeout:  45
 });
 
-// Add the server-side faye extension
-bayeux.addExtension(serverAuth);
-
-// Add the faye nodejs faye adapter to the nodejs server
-bayeux.attach(app);
+attach_faye(app);
 
 // Listen on port 4011 (0xFAB)
 app.listen(4011);
-
-function info(write) {
-  return write(function(write, head) {
-    var q = require('querystring').parse(head.url.query);
-    if (q.message)
-      write('<div id="info">' + q.message + '</div>');
-    return write;
-  });
-}
 
 
 // Additional functions
