@@ -6,9 +6,7 @@ The backend is fab.js based (which is, itself, node.js based).  The full list of
 
 <pre><code>
    npm install faye
-   npm install fab
-   npm install fab.static
-   npm install fab.accept
+   npm install express
    npm install dirty
 </code></pre>
 
